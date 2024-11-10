@@ -2,12 +2,6 @@
 	import { mdiPlus, mdiBellOutline } from '@mdi/js';
 	import SvgIcon from '@jamescoyle/svelte-icon';
 	import SidePanel from './SidePanel.svelte';
-
-	// todo: add upload model
-	// todo: add multi-scene support, for like different floors
-	// todo: search bar either opens window like tailwind or dropdown
-
-	// let selectedEntity = $derived($selectedId ? $entities[$selectedId] : undefined);
 </script>
 
 <div class="flex w-full flex-col gap-4 p-4 lg:grid lg:grid-cols-3">

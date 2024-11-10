@@ -1,9 +1,6 @@
 <script lang="ts">
 	import { mdiMapMarkerOutline, mdiWeatherPartlyCloudy } from '@mdi/js';
 	import SvgIcon from '@jamescoyle/svelte-icon';
-
-	// todo: fetch real values
-	// todo: add freedom units too
 </script>
 
 <div class="relative flex w-full flex-col rounded-xl border border-white/10 bg-white/10 p-4 shadow">

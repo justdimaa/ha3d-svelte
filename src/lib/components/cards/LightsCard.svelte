@@ -7,10 +7,6 @@
 	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
 	import { mdiLightSwitch } from '@mdi/js';
 
-	// todo: sync color
-	// todo: merge all lights of one mesh into one picker?
-	// todo: check properties like brightness only, cold-warm only etc
-
 	interface Props {
 		entity: HassEntity;
 	}

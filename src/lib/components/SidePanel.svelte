@@ -11,11 +11,6 @@
 	import { entities, selectedMesh, tempMeshes, user } from '../../stores/global';
 	import UserCard from './cards/UserCard.svelte';
 
-	// todo: lights menu
-	// todo: keep clock up to date
-	// todo: let user assign mutliple entities to mesh
-	// todo: add google maps like swipe up thingy for mobile
-
 	enum Tab {
 		Controls,
 		Info,

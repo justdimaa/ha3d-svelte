@@ -3,8 +3,6 @@
 	import { mdiRadar } from '@mdi/js';
 	import type { HassEntity } from 'home-assistant-js-websocket';
 
-	// todo: sensor settings
-
 	interface Props {
 		entity: HassEntity;
 	}

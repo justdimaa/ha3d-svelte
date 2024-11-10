@@ -2,9 +2,6 @@
 	import { mdiWeatherPartlyCloudy } from '@mdi/js';
 	import SvgIcon from '@jamescoyle/svelte-icon';
 	import { DateTime } from 'luxon';
-
-	// todo: fetch real values
-	// todo: add freedom units too
 </script>
 
 <div class="flex">

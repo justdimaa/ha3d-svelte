@@ -12,17 +12,6 @@
 	import { Material, MeshStandardMaterial, Raycaster, Vector2 } from 'three';
 	import { selectedMesh } from '../../../stores/global';
 
-	// done: smooth camera turn
-	// done: seethrough walls
-	// done: click on object for interaction menu
-
-	// todo: replace threlte with babylonjs?
-	// todo: click on empty space should unselect mesh too
-	// todo: search for entity should move camera to mesh or highlight it # https://next.threlte.xyz/docs/examples/postprocessing/outlines
-	// todo: fix move camera triggers object selection
-	// todo: fix ugly -> global illumination, anti aliasing, and whatever tanks fps
-	// todo: graphics option to let user boost fps again
-
 	const { scene, camera, renderer } = useThrelte();
 
 	const roomModel = useGltf('/room.glb');

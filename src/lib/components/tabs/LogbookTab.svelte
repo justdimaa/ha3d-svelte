@@ -6,10 +6,6 @@
 	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
 	import { mdiClockOutline, mdiFunction } from '@mdi/js';
 
-	// todo: replace hardcoded date
-	// todo: show user in logs
-	// todo: pagination
-
 	interface Props {
 		selectedEntities: HassEntity[];
 	}

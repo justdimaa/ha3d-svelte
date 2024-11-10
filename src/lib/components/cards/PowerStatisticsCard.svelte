@@ -3,9 +3,6 @@
 	import { onMount } from 'svelte';
 	import { homeApi } from '../../../stores/global';
 
-	// todo: fetch live updates
-	// todo: handle next day
-
 	const today = DateTime.local().startOf('day');
 
 	const hourlyStartTimes = [];
