@@ -1,0 +1,28 @@
+<script lang="ts">
+	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
+	import { mdiRadar } from '@mdi/js';
+	import type { HassEntity } from 'home-assistant-js-websocket';
+
+	// todo: sensor settings
+
+	interface Props {
+		entity: HassEntity;
+	}
+
+	let { entity }: Props = $props();
+</script>
+
+<button
+	class="flex justify-between gap-4 rounded-xl border border-white/10 bg-white/10 p-4 shadow"
+	disabled
+>
+	<div class="flex items-center gap-1">
+		<SvgIcon type="mdi" path={entity.attributes.icon ?? mdiRadar} size="24" />
+		<span>{entity.attributes.friendly_name ?? entity.entity_id}</span>
+	</div>
+	<div class="flex gap-1">
+		<!-- {entity.attributes.device_class} -->
+		<span>{entity.state}</span>
+		<span>{entity.attributes.unit_of_measurement}</span>
+	</div>
+</button>

@@ -1,0 +1,25 @@
+@import '/css/ubuntu.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* width */
+::-webkit-scrollbar {
+    @apply h-2 w-2
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    @apply bg-white/20 rounded-full
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    @apply bg-white/60 rounded-full
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-white
+}
