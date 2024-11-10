@@ -23,3 +23,99 @@
 ::-webkit-scrollbar-thumb:hover {
     @apply bg-white
 }
+
+/* calendar */
+.flatpickr-calendar {
+    @apply hidden backdrop-blur rounded-xl border border-white/10 text-white bg-white/10 font-ubuntu p-4 gap-4
+}
+
+.flatpickr-calendar.open {
+    @apply flex flex-col
+}
+
+.flatpickr-months {
+    @apply flex justify-between gap-4
+}
+
+.flatpickr-month {
+    @apply grow
+}
+
+.flatpickr-prev-month,
+.flatpickr-next-month {
+    @apply flex w-12 h-12 justify-center items-center fill-white cursor-pointer rounded-full border border-white/10 bg-white/10 hover:bg-white/20
+}
+
+.flatpickr-prev-month svg,
+.flatpickr-next-month svg {
+    @apply w-6 h-6
+}
+
+.flatpickr-current-month {
+    @apply flex flex-col gap-4 justify-center
+}
+
+.numInputWrapper {
+    @apply flex justify-center h-12 px-4 bg-white/10 border border-white/10 rounded-full hover:bg-white/20
+}
+
+.numInput.cur-year {
+    @apply w-full
+}
+
+.flatpickr-monthDropdown-months {
+    @apply flex h-12 px-4 bg-white/10 border border-white/10 rounded-full hover:bg-white/20
+}
+
+.flatpickr-weekdaycontainer {
+    @apply grid grid-cols-7
+}
+
+.flatpickr-weekday {
+    @apply flex justify-center items-center h-12
+}
+
+.dayContainer {
+    @apply grid grid-cols-7 gap-y-1
+}
+
+.flatpickr-day {
+    @apply flex justify-center items-center h-12 cursor-pointer
+}
+
+.flatpickr-day:not(.startRange):not(.inRange):not(.endRange) {
+    @apply hover:bg-white/10 hover:border hover:border-white/10 hover:rounded-full
+}
+
+.flatpickr-day.startRange {
+    @apply rounded-l-full border-l
+}
+
+.flatpickr-day.endRange {
+    @apply rounded-r-full border-r
+}
+
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.inRange {
+    @apply bg-white/20 border-white/10 border-y hover:bg-white/30
+}
+
+.flatpickr-time {
+    @apply flex items-center justify-center
+}
+
+.numInput.cur-year,
+.numInput.flatpickr-hour,
+.numInput.flatpickr-minute {
+    @apply h-12 flex rounded-full bg-transparent outline-none
+}
+
+.numInput.flatpickr-hour,
+.numInput.flatpickr-minute {
+    @apply w-12
+}
+
+.flatpickr-am-pm {
+    @apply flex rounded-full border h-12 w-12 ml-4 justify-center items-center border-white/10 bg-white/10 hover:bg-white/20 cursor-pointer
+}

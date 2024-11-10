@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { homeApi } from '../../../stores/global';
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import { DateTime } from 'luxon';
 	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
-	import { mdiClockOutline, mdiFunction } from '@mdi/js';
+	import { mdiCalendarOutline, mdiClockOutline, mdiFunction } from '@mdi/js';
+	import flatpickr from 'flatpickr';
 
 	interface Props {
 		selectedEntities: HassEntity[];
@@ -12,40 +13,88 @@
 
 	let { selectedEntities }: Props = $props();
 
+	let logs = $state([]);
+
+	let sortedLogs = $derived(logs.toSorted((a, b) => (a.when - b.when > 0 ? -1 : 1)).slice(0, 25));
+
+	let startTime = $state(DateTime.now().minus({ days: 1 }));
+	let endTime = $state(DateTime.now().plus({ years: 1 }));
+
 	$effect(() => {
 		logs = [];
 
 		$homeApi?.subscribeMessage(
 			(msg) => {
 				for (let event of msg.events) {
-					// console.debug(event);
 					logs.push(event);
 				}
 			},
 			{
 				type: 'logbook/event_stream',
-				start_time: '2024-11-08T18:00:57.720Z',
-				end_time: '2025-11-09T18:00:57.720Z',
+				start_time: startTime.toUTC().toISO(),
+				end_time: endTime.toUTC().toISO(),
 				entity_ids: selectedEntities.map((e) => e.entity_id)
 			}
 		);
 	});
 
-	let logs = $state([]);
+	let calendarDiv: HTMLElement;
+	let timePicker: flatpickr.Instance;
 
-	let sortedLogs = $derived(logs.toSorted((a, b) => (a.when - b.when > 0 ? -1 : 1)).slice(0, 25));
+	onMount(() => {
+		timePicker = flatpickr('#logsTimeRange', {
+			mode: 'range',
+			enableTime: true,
+			dateFormat: 'm/d/Y H:i',
+			defaultDate: [startTime.toUTC().toISO(), endTime.toUTC().toISO()],
+			appendTo: calendarDiv,
+			time_24hr: false,
+			clickOpens: false,
+			onChange: (e) => {
+				let start = e[0];
+				let end = e[1];
 
-	// onMount(async () => {});
+				if (!start || !end) return;
+
+				let startL = DateTime.fromJSDate(start);
+				let endL = DateTime.fromJSDate(end);
+
+				if (!startL.isValid || !endL.isValid) return;
+
+				startTime = startL;
+				endTime = endL;
+			}
+		}) as flatpickr.Instance;
+	});
+
+	onDestroy(() => {
+		timePicker.destroy();
+	});
 </script>
 
 <span class="text-2xl font-bold">Logbook</span>
+
+<div class="flex flex-col gap-4" bind:this={calendarDiv}>
+	<button
+		class="flex cursor-pointer items-center gap-1 rounded-full border border-white/10 bg-white/10 px-4"
+		onclick={() => timePicker.open()}
+	>
+		<SvgIcon type="mdi" path={mdiCalendarOutline} size="20" />
+		<input
+			id="logsTimeRange"
+			class="h-12 grow cursor-pointer bg-transparent outline-none"
+			type="text"
+			placeholder="Select Time Range"
+		/>
+	</button>
+</div>
 
 <div class="flex flex-col divide-y divide-white/20">
 	{#each sortedLogs as event}
 		<div class="flex flex-col py-2">
 			<div class="flex items-center gap-1">
 				<SvgIcon type="mdi" path={mdiFunction} size="16"></SvgIcon>
-				<span>{event.context_service} • {event.state} </span>
+				<span>{event.context_service} • {event.state}</span>
 			</div>
 			<div class="flex items-center gap-1 text-neutral-300">
 				<SvgIcon type="mdi" path={mdiClockOutline} size="12"></SvgIcon>
