@@ -12,15 +12,13 @@
 
 	let { selectedEntities }: Props = $props();
 
-	let logs = $state([]);
+	$effect(() => {
+		logs = [];
 
-	let sortedLogs = $derived(logs.toSorted((a, b) => (a.when - b.when > 0 ? -1 : 1)).slice(0, 25));
-
-	onMount(async () => {
 		$homeApi?.subscribeMessage(
 			(msg) => {
 				for (let event of msg.events) {
-					console.debug(event);
+					// console.debug(event);
 					logs.push(event);
 				}
 			},
@@ -28,10 +26,16 @@
 				type: 'logbook/event_stream',
 				start_time: '2024-11-08T18:00:57.720Z',
 				end_time: '2025-11-09T18:00:57.720Z',
-				entity_ids: [selectedEntities[0].entity_id]
+				entity_ids: selectedEntities.map((e) => e.entity_id)
 			}
 		);
 	});
+
+	let logs = $state([]);
+
+	let sortedLogs = $derived(logs.toSorted((a, b) => (a.when - b.when > 0 ? -1 : 1)).slice(0, 25));
+
+	// onMount(async () => {});
 </script>
 
 <span class="text-2xl font-bold">Logbook</span>
