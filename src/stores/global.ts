@@ -1,9 +1,10 @@
-import { Connection, createConnection, createLongLivedTokenAuth, subscribeEntities, type HassEntities } from "home-assistant-js-websocket";
+import { Connection, createConnection, createLongLivedTokenAuth, getUser, subscribeEntities, type HassEntities, type HassUser } from "home-assistant-js-websocket";
 import { writable, type Writable } from "svelte/store";
 import { HA_API_KEY, HA_API_URL } from '$env/static/public'; // todo: change it later
 import type { SelectedMesh } from "$lib";
 
 export const homeApi: Writable<Connection | undefined> = writable(undefined);
+export const user: Writable<HassUser> = writable();
 export const entities: Writable<HassEntities> = writable({});
 export const selectedMesh: Writable<string | undefined> = writable(undefined);
 
@@ -18,6 +19,7 @@ export const connect = async () => {
     const auth = createLongLivedTokenAuth(HA_API_URL, HA_API_KEY);
     const connection = await createConnection({ auth });
     homeApi.set(connection);
+    user.set(await getUser(connection));
 
     subscribeEntities(connection, (state) => {
         console.debug(state)

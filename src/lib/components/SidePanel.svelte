@@ -1,6 +1,5 @@
 <script lang="ts">
 	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
-	import { DateTime } from 'luxon';
 	import PowerStatisticsCard from './cards/PowerStatisticsCard.svelte';
 	import WeatherCurrentCard from './cards/WeatherCurrentCard.svelte';
 	import WeatherForecastsCard from './cards/WeatherForecastsCard.svelte';
@@ -9,10 +8,10 @@
 	import InfoPanel from './tabs/InfoTab.svelte';
 	import LogbookPanel from './tabs/LogbookTab.svelte';
 	import SettingsPanel from './tabs/SettingsTab.svelte';
-	import { entities, selectedMesh, tempMeshes } from '../../stores/global';
+	import { entities, selectedMesh, tempMeshes, user } from '../../stores/global';
+	import UserCard from './cards/UserCard.svelte';
 
 	// todo: lights menu
-	// todo: fetch user data
 	// todo: keep clock up to date
 	// todo: let user assign mutliple entities to mesh
 	// todo: add google maps like swipe up thingy for mobile
@@ -24,11 +23,11 @@
 		Settings
 	}
 
+	let userEntity = $derived($user ? $entities[`person.${$user.name}`] : undefined);
+
 	let selected = $derived($selectedMesh ? $tempMeshes[$selectedMesh] : undefined);
 
 	let selectedEntities = $derived(selected?.entity_ids.map((i) => $entities[i]));
-
-	let username = '@justdimaa';
 
 	let currentTab = $state(Tab.Controls);
 
@@ -91,17 +90,9 @@
 		<span>todo: add card</span>
 	{/if}
 {:else}
-	<div class="flex justify-between">
-		<div class="flex flex-col justify-between">
-			<span class="font-bold">Hi, {username}!</span>
-			<span class="text-neutral-400">{DateTime.now().toLocaleString(DateTime.DATETIME_MED)}</span>
-		</div>
-		<img
-			class="aspect-square h-12 rounded-full object-cover"
-			src="https://placehold.co/512x256"
-			alt="pfp"
-		/>
-	</div>
+	{#if userEntity}
+		<UserCard {userEntity} />
+	{/if}
 	<WeatherCurrentCard />
 	<span class="text-2xl">Forecast</span>
 	<WeatherForecastsCard />
