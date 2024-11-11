@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { DateTime } from 'luxon';
 	import { onMount } from 'svelte';
-	import { homeApi } from '../../../stores/global';
+	import { entities, homeApi } from '../../../stores/global';
 
 	const today = DateTime.local().startOf('day');
 
@@ -93,7 +93,7 @@
 			type: 'energy/get_prefs'
 		});
 
-		let entityNames = prefs.energy_sources.at(0).flow_from.map((s) => s.stat_energy_from);
+		let entityIds = prefs.energy_sources.at(0).flow_from.map((s) => s.stat_energy_from);
 
 		let today = DateTime.utc().startOf('day');
 
@@ -101,14 +101,14 @@
 			type: 'recorder/statistics_during_period',
 			start_time: today.minus({ hours: 1 }).toISO(),
 			end_time: today.plus({ days: 1 }).minus({ milliseconds: 1 }).toISO(),
-			statistic_ids: entityNames,
+			statistic_ids: entityIds,
 			period: 'hour',
 			units: { energy: 'kWh', volume: 'm³' },
 			types: ['change']
 		});
 
-		statSeries = Object.entries(stats).map(([name, data]) => ({
-			name,
+		statSeries = Object.entries(stats).map(([id, data]) => ({
+			name: $entities[id].attributes.friendly_name ?? id,
 			data: data.map((d) => d.change.toFixed(2))
 		}));
 
