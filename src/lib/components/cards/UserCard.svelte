@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { HA_API_URL } from '$env/static/public';
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import { DateTime } from 'luxon';
 	import { onMount } from 'svelte';
+	import { homeApi } from '../../../stores/global';
 
 	interface Props {
 		userEntity: HassEntity;
@@ -12,7 +12,7 @@
 
 	let pfpUrl = $derived(
 		userEntity.attributes.entity_picture
-			? HA_API_URL.replace(/\/+$/, '') + userEntity.attributes.entity_picture
+			? $homeApi?.options.auth?.data.hassUrl + userEntity.attributes.entity_picture
 			: undefined
 	);
 	let time = $state(DateTime.now());
