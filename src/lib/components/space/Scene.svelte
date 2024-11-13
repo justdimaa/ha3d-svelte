@@ -9,8 +9,13 @@
 		UnrealBloomPass
 	} from 'three/examples/jsm/Addons.js';
 	import { onMount } from 'svelte';
-	import { Material, MeshStandardMaterial, Raycaster, Vector2 } from 'three';
+	import { Material, MeshStandardMaterial, Vector2 } from 'three';
 	import { selectedMesh } from '../../../stores/global';
+
+	interface Selected {
+		obj: any;
+		mat: Material;
+	}
 
 	const { scene, camera, renderer } = useThrelte();
 
@@ -34,34 +39,12 @@
 		}
 	});
 
-	const raycaster = new Raycaster();
-	const pointer = new Vector2();
-
-	interface Selected {
-		obj: any;
-		mat: Material;
-	}
-
 	let selected: Selected | undefined;
 
-	function onPointerMove(e) {
-		// calculate pointer position in normalized device coordinates
-		// (-1 to +1) for both components
-
-		pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-		pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
-	}
-
 	const renderRay = (e) => {
-		// update the picking ray with the camera and pointer position
-		raycaster.setFromCamera(pointer, camera.current);
+		if (e.delta != 0) return;
 
-		// calculate objects intersecting the picking ray
-		const intersects = raycaster.intersectObjects(scene.children);
-
-		for (let i = 0; i < intersects.length; i++) {
-			let intersect = intersects[i];
-
+		for (let intersect of e.intersections) {
 			if (!intersect.object.name) continue;
 			if (intersect.object.material.name.includes('wall')) continue;
 
@@ -117,7 +100,6 @@
 
 	onMount(() => {
 		setupEffectComposer();
-		window.addEventListener('pointermove', onPointerMove);
 	});
 </script>
 
