@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { DateTime } from 'luxon';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { entities, homeApi } from '../../../stores/global';
 
 	const today = DateTime.local().startOf('day');
@@ -119,6 +119,10 @@
 		const ApexCharts = (await import('apexcharts')).default;
 		chart = new ApexCharts(chartDiv, options);
 		chart.render();
+	});
+
+	onDestroy(() => {
+		chart?.destroy();
 	});
 </script>
 
