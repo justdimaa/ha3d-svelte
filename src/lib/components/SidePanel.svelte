@@ -3,19 +3,33 @@
 	import PowerStatisticsCard from './cards/PowerStatisticsCard.svelte';
 	import WeatherCurrentCard from './cards/WeatherCurrentCard.svelte';
 	import WeatherForecastsCard from './cards/WeatherForecastsCard.svelte';
-	import { mdiCogOutline, mdiGamepadOutline, mdiHistory, mdiInformationOutline } from '@mdi/js';
+	import {
+		mdiCogOutline,
+		mdiDevices,
+		mdiGamepadOutline,
+		mdiHistory,
+		mdiInformationOutline
+	} from '@mdi/js';
 	import ControlsPanel from './tabs/ControlsTab.svelte';
 	import InfoPanel from './tabs/InfoTab.svelte';
 	import LogbookPanel from './tabs/LogbookTab.svelte';
 	import SettingsPanel from './tabs/SettingsTab.svelte';
 	import { entities, selectedMesh, tempMeshes, user } from '../../stores/global';
 	import UserCard from './cards/UserCard.svelte';
+	import AddTab from './tabs/AddTab.svelte';
 
 	enum Tab {
 		Controls,
 		Info,
 		Logbook,
-		Settings
+		Settings,
+		AddEntity
+	}
+
+	interface TabData {
+		type: Tab;
+		icon: string;
+		hidden: boolean;
 	}
 
 	let userEntity = $derived($user ? $entities[`person.${$user.name}`] : undefined);
@@ -24,54 +38,60 @@
 
 	let selectedEntities = $derived(selected?.entity_ids.map((i) => $entities[i]));
 
-	let currentTab = $state(Tab.Controls);
+	let _currentTab = $state(Tab.Controls);
+	let currentTab = $derived(selectedEntities ? _currentTab : Tab.AddEntity);
 
-	let tabData = [
+	let tabData: TabData[] = [
 		{
-			tab: Tab.Controls,
-			icon: mdiGamepadOutline
+			type: Tab.Controls,
+			icon: mdiGamepadOutline,
+			hidden: false
 		},
-
 		{
-			tab: Tab.Info,
-			icon: mdiInformationOutline
+			type: Tab.Info,
+			icon: mdiInformationOutline,
+			hidden: false
 		},
-
 		{
-			tab: Tab.Logbook,
-			icon: mdiHistory
+			type: Tab.Logbook,
+			icon: mdiHistory,
+			hidden: false
 		},
-
 		{
-			tab: Tab.Settings,
-			icon: mdiCogOutline
+			type: Tab.Settings,
+			icon: mdiCogOutline,
+			hidden: false
+		},
+		{
+			type: Tab.AddEntity,
+			icon: mdiDevices,
+			hidden: true
 		}
 	];
+
+	export function onAddEntityClicked() {
+		_currentTab = Tab.AddEntity;
+	}
 </script>
 
 {#if $selectedMesh}
-	{#if selectedEntities}
-		<!-- <div class="flex items-center gap-2">
-		<SvgIcon type="mdi" path={selectedEntities[0].attributes.icon ?? mdiDevices}></SvgIcon>
-		<span class="text-3xl"
-			>{selectedEntities[0].attributes.friendly_name ?? selectedEntities[0].entity_id}</span
-		>
-	</div> -->
-		<div class="flex w-full gap-4">
-			{#each tabData as tab}
-				<button
-					class="flex grow justify-center rounded-xl border border-white/10 bg-white/10 p-4 hover:bg-white/20 {currentTab ==
-					tab.tab
-						? 'bg-white/20'
-						: ''}"
-					onclick={() => {
-						currentTab = tab.tab;
-					}}
-				>
-					<SvgIcon type="mdi" path={tab.icon} size="24"></SvgIcon>
-				</button>
-			{/each}
-		</div>
+	<div class="flex w-full gap-4">
+		{#each tabData.filter((d) => !d.hidden) as tab}
+			<button
+				class="flex grow justify-center rounded-xl border border-white/10 bg-white/10 p-4 hover:bg-white/20 disabled:bg-white/10 disabled:text-white/20 {_currentTab ==
+				tab.type
+					? 'bg-white/20'
+					: ''}"
+				disabled={selectedEntities == undefined}
+				onclick={() => {
+					_currentTab = tab.type;
+				}}
+			>
+				<SvgIcon type="mdi" path={tab.icon} size="24"></SvgIcon>
+			</button>
+		{/each}
+	</div>
+	<div class="flex w-full flex-col gap-4 overflow-y-auto">
 		{#if currentTab == Tab.Controls}
 			<ControlsPanel {selectedEntities} />
 		{:else if currentTab == Tab.Info}
@@ -80,10 +100,10 @@
 			<LogbookPanel {selectedEntities} />
 		{:else if currentTab == Tab.Settings}
 			<SettingsPanel />
+		{:else if currentTab == Tab.AddEntity}
+			<AddTab {selectedEntities} />
 		{/if}
-	{:else}
-		<span>todo: add card</span>
-	{/if}
+	</div>
 {:else}
 	{#if userEntity}
 		<UserCard {userEntity} />

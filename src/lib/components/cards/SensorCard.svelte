@@ -2,6 +2,7 @@
 	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
 	import { mdiRadar } from '@mdi/js';
 	import type { HassEntity } from 'home-assistant-js-websocket';
+	import { getIconPath } from '../../../utils/icons';
 
 	interface Props {
 		entity: HassEntity;
@@ -14,8 +15,8 @@
 	class="flex justify-between gap-4 rounded-xl border border-white/10 bg-white/10 p-4 shadow"
 	disabled
 >
-	<div class="flex items-center gap-1">
-		<SvgIcon type="mdi" path={entity.attributes.icon ?? mdiRadar} size="24" />
+	<div class="flex items-center gap-2">
+		<SvgIcon type="mdi" path={getIconPath(entity.attributes.icon, mdiRadar)} size="24" />
 		<span>{entity.attributes.friendly_name ?? entity.entity_id}</span>
 	</div>
 	<div class="flex gap-1">

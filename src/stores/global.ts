@@ -2,13 +2,18 @@ import { Connection, createConnection, ERR_HASS_HOST_REQUIRED, getAuth, getUser,
 import { writable, type Writable } from "svelte/store";
 import type { SelectedMesh } from "$lib";
 
+
+export type SelectedMeshes = {
+    [id: string]: SelectedMesh;
+};
+
 export const homeApi: Writable<Connection | undefined> = writable(undefined);
 export const user: Writable<HassUser> = writable();
 export const entities: Writable<HassEntities> = writable({});
 export const selectedMesh: Writable<string | undefined> = writable(undefined);
 
 // todo: find an alternative where to store values
-export const tempMeshes: Writable<Map<string, SelectedMesh>> = writable(new Map());
+export const tempMeshes: Writable<SelectedMeshes> = writable();
 
 export const cameraSettings = writable({
     enableDamping: true
@@ -26,6 +31,14 @@ async function loadAuthTokens(): Promise<AuthData | null> {
 
 function saveAuthTokens(data: AuthData | null) {
     localStorage.setItem("auth", JSON.stringify(data));
+}
+
+export function loadMeshes(): SelectedMeshes {
+    return JSON.parse(localStorage.getItem("meshes") ?? "{}");
+}
+
+export function saveMeshes(val: SelectedMeshes) {
+    localStorage.setItem("meshes", JSON.stringify(val));
 }
 
 export const connect = async () => {
@@ -63,7 +76,4 @@ export const connect = async () => {
         console.debug(state)
         entities.set(state);
     })
-
-    // todo: not really the place for it here, move it
-    tempMeshes.set(JSON.parse(localStorage.getItem("meshes") ?? "{}"));
 }
