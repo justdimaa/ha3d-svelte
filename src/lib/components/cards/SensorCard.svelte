@@ -1,8 +1,7 @@
 <script lang="ts">
 	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
-	import { mdiRadar } from '@mdi/js';
 	import type { HassEntity } from 'home-assistant-js-websocket';
-	import { getIconPath } from '../../../utils/icons';
+	import { getEntityIcon } from '../../../utils/icons';
 
 	interface Props {
 		entity: HassEntity;
@@ -16,7 +15,7 @@
 	disabled
 >
 	<div class="flex items-center gap-2">
-		<SvgIcon type="mdi" path={getIconPath(entity.attributes.icon, mdiRadar)} size="24" />
+		<SvgIcon type="mdi" path={getEntityIcon(entity)} size="24" />
 		<span>{entity.attributes.friendly_name ?? entity.entity_id}</span>
 	</div>
 	<div class="flex gap-1">

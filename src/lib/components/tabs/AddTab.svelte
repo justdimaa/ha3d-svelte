@@ -2,7 +2,7 @@
 	import { entities, selectedMesh, tempMeshes } from '../../../stores/global';
 	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
 	import type { HassEntity } from 'home-assistant-js-websocket';
-	import { getIconPath } from '../../../utils/icons';
+	import { getEntityIcon } from '../../../utils/icons';
 	import { mdiDevices, mdiMagnify } from '@mdi/js';
 
 	// todo: tab shouldnt disappear after selected first entity
@@ -58,12 +58,7 @@
 			onclick={() => onToggleEntity(entity)}
 		>
 			<div class="flex items-center gap-2 truncate">
-				<SvgIcon
-					class="flex-shrink-0"
-					type="mdi"
-					path={getIconPath(entity.attributes.icon, mdiDevices)}
-					size="20"
-				/>
+				<SvgIcon class="flex-shrink-0" type="mdi" path={getEntityIcon(entity)} size="20" />
 				<span class="truncate">{entity.entity_id}</span>
 			</div>
 			<label class="pointer-events-none inline-flex cursor-pointer items-center">
