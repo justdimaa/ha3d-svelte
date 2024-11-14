@@ -16,7 +16,7 @@
 				placeholder="Search for entities"
 			/>
 			<button
-				class="pointer-events-auto flex h-12 items-center gap-2 rounded-full border border-cyan-300/40 bg-cyan-900/60 px-4 backdrop-blur hover:bg-cyan-800/60 disabled:border-neutral-600/40 disabled:bg-neutral-900/60 disabled:text-neutral-500"
+				class="pointer-events-auto flex h-12 items-center gap-2 rounded-full border border-cyan-300/40 bg-cyan-900/60 px-4 shadow-[0_0_30px_0px_rgba(103,232,249,.3)] backdrop-blur hover:bg-cyan-800/60 disabled:border-neutral-600/40 disabled:bg-neutral-900/60 disabled:text-neutral-500 disabled:shadow-none"
 				disabled={$selectedMesh == undefined}
 				onclick={() => {
 					sidePanel.onAddEntityClicked();
