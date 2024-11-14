@@ -35,6 +35,8 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@babylonjs/core": "^7.33.0",
+		"@babylonjs/loaders": "^7.33.0",
 		"@jaames/iro": "^5.5.2",
 		"@jamescoyle/svelte-icon": "^0.1.1",
 		"@mdi/js": "^7.4.47",
@@ -43,7 +45,6 @@
 		"apexcharts": "^4.0.0",
 		"flatpickr": "^4.6.13",
 		"home-assistant-js-websocket": "^9.4.0",
-		"luxon": "^3.5.0",
-		"three": "^0.170.0"
+		"luxon": "^3.5.0"
 	}
 }
