@@ -10,6 +10,8 @@ export class SceneManager {
     meshClickHandler: MeshClickHandler;
 
     constructor(canvas: HTMLCanvasElement) {
+        BABYLON.SceneLoader.ShowLoadingScreen = false;
+
         this.canvas = canvas;
         this.engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
         this.scene = new BABYLON.Scene(this.engine);
@@ -33,6 +35,10 @@ export class SceneManager {
         window.addEventListener('resize', () => {
             this.engine.resize();
         });
+    }
+
+    public destroy() {
+        this.engine?.dispose();
     }
 
     private initCamera() {
