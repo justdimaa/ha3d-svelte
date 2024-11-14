@@ -2,17 +2,69 @@
 	import { mdiWeatherPartlyCloudy } from '@mdi/js';
 	import SvgIcon from '@jamescoyle/svelte-icon';
 	import { DateTime } from 'luxon';
+	import type { HassEntity } from 'home-assistant-js-websocket';
+	import { onMount } from 'svelte';
+	import { homeApi } from '../../../stores/global';
+
+	interface Props {
+		weatherEntity: HassEntity;
+	}
+
+	let { weatherEntity }: Props = $props();
+	let forecasts = $state([]);
+	let forecastsDisplay = $derived(() => {
+		const groupedByDay = forecasts.reduce((acc, item) => {
+			const date = DateTime.fromISO(item.datetime).toISODate(); // Get only the date (YYYY-MM-DD)
+			if (!acc[date]) {
+				acc[date] = [];
+			}
+			acc[date].push(item);
+			return acc;
+		}, {});
+
+		// Select the most representative forecast for each day
+		const dailyForecast = Object.entries(groupedByDay).map(([date, forecasts]) => {
+			// Example strategy: Choose the forecast closest to 12:00 PM
+			const targetTime = DateTime.fromISO(date).set({ hour: 12 });
+			const closestForecast = forecasts.reduce((closest, current) => {
+				const currentTime = DateTime.fromISO(current.datetime);
+				const closestTime = DateTime.fromISO(closest.datetime);
+				return Math.abs(currentTime.diff(targetTime).milliseconds) <
+					Math.abs(closestTime.diff(targetTime).milliseconds)
+					? current
+					: closest;
+			});
+			return closestForecast;
+		});
+
+		return dailyForecast;
+	});
+
+	onMount(async () => {
+		await $homeApi?.subscribeMessage(
+			(msg) => {
+				if (!msg.forecast) return;
+				console.log(msg.forecast[0]);
+				forecasts = msg.forecast;
+			},
+			{
+				type: 'weather/subscribe_forecast',
+				forecast_type: 'hourly',
+				entity_id: weatherEntity.entity_id
+			}
+		);
+	});
 </script>
 
 <div class="flex">
 	<div class="flex gap-4 overflow-x-auto pb-2">
-		{#each { length: 6 } as _, i}
+		{#each forecastsDisplay() as forecast}
 			<div
 				class="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-white/10 p-4 shadow"
 			>
-				<span class="text-neutral-300">Wed</span>
+				<span class="text-neutral-300">{DateTime.fromISO(forecast.datetime).weekdayShort}</span>
 				<SvgIcon type="mdi" path={mdiWeatherPartlyCloudy} size="48"></SvgIcon>
-				<span class="text-xl font-bold">7°</span>
+				<span class="text-xl font-bold">{Math.round(forecast.temperature)}°</span>
 			</div>
 		{/each}
 	</div>

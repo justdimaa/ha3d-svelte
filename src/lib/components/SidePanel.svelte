@@ -33,6 +33,7 @@
 	}
 
 	let userEntity = $derived($user ? $entities[`person.${$user.name}`] : undefined);
+	let weatherEntity = $derived($entities['weather.openweathermap']);
 
 	let selected = $derived($selectedMesh ? $tempMeshes[$selectedMesh] : undefined);
 
@@ -108,9 +109,11 @@
 	{#if userEntity}
 		<UserCard {userEntity} />
 	{/if}
-	<WeatherCurrentCard />
-	<span class="text-2xl">Forecast</span>
-	<WeatherForecastsCard />
+	{#if weatherEntity}
+		<WeatherCurrentCard {weatherEntity} />
+		<span class="text-2xl">Forecast</span>
+		<WeatherForecastsCard {weatherEntity} />
+	{/if}
 	<span class="text-2xl">Power Statistics</span>
 	<PowerStatisticsCard />
 {/if}
