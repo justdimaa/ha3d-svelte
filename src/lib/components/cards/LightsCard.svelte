@@ -12,9 +12,8 @@
 	}
 
 	let { entity }: Props = $props();
-	let pickerId = `picker-${crypto.randomUUID()}`;
-
 	let colorPicker: IroColorPicker | undefined = $state(undefined);
+	let pickerDiv: HTMLElement;
 
 	// entities.subscribe(() => {
 	// 	console.log(colorPicker);
@@ -45,7 +44,7 @@
 		let hs = entity.attributes.hs_color ?? [0, 0];
 		let v = haToIroBrightness(entity.attributes.brightness ?? 0);
 
-		colorPicker = new iro.ColorPicker('#' + pickerId, {
+		colorPicker = iro.ColorPicker(pickerDiv, {
 			color: new iro.Color({
 				h: hs[0],
 				s: hs[1],
@@ -130,6 +129,9 @@
 
 <div class="flex flex-col gap-3">
 	<div class="flex justify-center rounded-xl border border-white/10 bg-white/10 p-4 shadow">
-		<div id={pickerId} class="drop-shadow"></div>
+		<div
+			class="drop-shadow {entity.state == 'on' ? '' : 'pointer-events-none grayscale-[0.5]'}"
+			bind:this={pickerDiv}
+		></div>
 	</div>
 </div>
