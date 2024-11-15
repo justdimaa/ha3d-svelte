@@ -75,45 +75,55 @@
 	}
 </script>
 
-{#if $selectedMesh}
-	<div class="flex w-full gap-4">
-		{#each tabData.filter((d) => !d.hidden) as tab}
-			<button
-				class="flex grow justify-center rounded-xl border border-white/10 bg-white/10 p-4 hover:bg-white/20 disabled:bg-white/10 disabled:text-white/20 {_currentTab ==
-				tab.type
-					? 'bg-white/20'
-					: ''}"
-				disabled={selectedEntities == undefined}
-				onclick={() => {
-					_currentTab = tab.type;
-				}}
-			>
-				<SvgIcon type="mdi" path={tab.icon} size="24"></SvgIcon>
-			</button>
-		{/each}
-	</div>
-	<div class="flex w-full flex-col gap-4 overflow-y-auto">
-		{#if currentTab == Tab.Controls}
-			<ControlsPanel {selectedEntities} />
-		{:else if currentTab == Tab.Info}
-			<InfoPanel {selectedEntities} />
-		{:else if currentTab == Tab.Logbook}
-			<LogbookPanel {selectedEntities} />
-		{:else if currentTab == Tab.Settings}
-			<SettingsPanel />
-		{:else if currentTab == Tab.AddEntity}
-			<AddTab {selectedEntities} />
-		{/if}
-	</div>
-{:else}
-	{#if userEntity}
-		<UserCard {userEntity} />
+<div
+	class="pointer-events-auto flex h-full w-full flex-col overflow-y-auto overflow-x-hidden rounded-xl border border-white/10 bg-cyan-900/30 backdrop-blur lg:col-span-1"
+>
+	{#if $selectedMesh}
+		<div class="flex w-full gap-2 bg-white/10 p-2 shadow">
+			{#each tabData.filter((d) => !d.hidden) as tab}
+				<button
+					class="flex h-12 grow items-center justify-center rounded-xl backdrop-blur-2xl hover:bg-white/10 disabled:bg-transparent disabled:text-white/20 {_currentTab ==
+					tab.type
+						? 'bg-white/10'
+						: ''}"
+					disabled={selectedEntities == undefined}
+					onclick={() => {
+						_currentTab = tab.type;
+					}}
+				>
+					<SvgIcon type="mdi" path={tab.icon} size="24"></SvgIcon>
+				</button>
+			{/each}
+		</div>
+		<div class="flex w-full flex-col gap-2 overflow-y-auto rounded-xl p-4">
+			{#if currentTab == Tab.Controls}
+				<ControlsPanel {selectedEntities} />
+			{:else if currentTab == Tab.Info}
+				<InfoPanel {selectedEntities} />
+			{:else if currentTab == Tab.Logbook}
+				<LogbookPanel {selectedEntities} />
+			{:else if currentTab == Tab.Settings}
+				<SettingsPanel />
+			{:else if currentTab == Tab.AddEntity}
+				<AddTab {selectedEntities} />
+			{/if}
+		</div>
+	{:else}
+		<div class="flex flex-col gap-4 p-4">
+			{#if userEntity}
+				<UserCard {userEntity} />
+			{/if}
+			{#if weatherEntity}
+				<WeatherCurrentCard {weatherEntity} />
+				<div class="flex flex-col gap-2">
+					<span class="text-2xl">Forecast</span>
+					<WeatherForecastsCard {weatherEntity} />
+				</div>
+			{/if}
+			<div class="flex flex-col gap-2">
+				<span class="text-2xl">Power Statistics</span>
+				<PowerStatisticsCard />
+			</div>
+		</div>
 	{/if}
-	{#if weatherEntity}
-		<WeatherCurrentCard {weatherEntity} />
-		<span class="text-2xl">Forecast</span>
-		<WeatherForecastsCard {weatherEntity} />
-	{/if}
-	<span class="text-2xl">Power Statistics</span>
-	<PowerStatisticsCard />
-{/if}
+</div>

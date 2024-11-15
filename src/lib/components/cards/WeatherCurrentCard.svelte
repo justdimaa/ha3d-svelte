@@ -29,7 +29,9 @@
 	});
 </script>
 
-<div class="relative flex w-full flex-col rounded-xl border border-white/10 bg-white/10 p-4 shadow">
+<div
+	class="relative flex w-full flex-col rounded-xl border border-white/10 bg-white/10 px-4 py-2 shadow backdrop-blur-2xl"
+>
 	<SvgIcon
 		type="mdi"
 		path={getWeatherIcon(currentForecast?.condition)}

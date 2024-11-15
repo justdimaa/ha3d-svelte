@@ -74,9 +74,9 @@
 
 <span class="text-2xl font-bold">Logbook</span>
 
-<div class="flex flex-col gap-4" bind:this={calendarDiv}>
+<div class="flex flex-col gap-2 pb-2" bind:this={calendarDiv}>
 	<button
-		class="flex cursor-pointer items-center gap-1 rounded-full border border-white/10 bg-white/10 px-4"
+		class="flex h-12 cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 shadow backdrop-blur-2xl"
 		onclick={() => timePicker.open()}
 	>
 		<SvgIcon type="mdi" path={mdiCalendarOutline} size="20" />
@@ -89,9 +89,11 @@
 	</button>
 </div>
 
-<div class="flex flex-col divide-y divide-white/20">
+<div class="grid gap-2">
 	{#each sortedLogs as event}
-		<div class="flex flex-col py-2">
+		<div
+			class="flex flex-col rounded-xl border border-white/10 bg-white/10 px-4 py-2 shadow backdrop-blur-2xl"
+		>
 			<div class="flex items-center gap-1">
 				<SvgIcon type="mdi" path={mdiFunction} size="16"></SvgIcon>
 				<span>{event.context_service} • {event.state}</span>

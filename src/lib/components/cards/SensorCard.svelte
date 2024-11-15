@@ -11,7 +11,7 @@
 </script>
 
 <button
-	class="flex justify-between gap-4 rounded-xl border border-white/10 bg-white/10 p-4 shadow"
+	class="flex justify-between gap-2 rounded-xl border border-white/10 bg-white/10 p-4 shadow backdrop-blur-2xl"
 	disabled
 >
 	<div class="flex items-center gap-2">

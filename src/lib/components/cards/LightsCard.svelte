@@ -14,6 +14,7 @@
 	let { entity }: Props = $props();
 	let colorPicker: IroColorPicker | undefined = $state(undefined);
 	let pickerDiv: HTMLElement;
+	let currentColor: string | undefined = $state(undefined);
 
 	// Utility functions
 	const haToIroBrightness = (haBrightness: number): number =>
@@ -58,11 +59,6 @@
 
 	// Initialize color picker
 	const initColorPicker = () => {
-		// Clean up existing picker if any
-		if (colorPicker) {
-			colorPicker.destroy();
-		}
-
 		const hs = entity.attributes.hs_color ?? [0, 0];
 		const v = haToIroBrightness(entity.attributes.brightness ?? 0);
 		const colorModes: string[] = entity.attributes.supported_color_modes;
@@ -119,11 +115,14 @@
 			layoutDirection: 'vertical',
 			padding: 4,
 			wheelLightness: false,
+			borderWidth: 1,
+			borderColor: '#ffffff60',
 			layout
 		};
 
 		colorPicker = iro.ColorPicker(pickerDiv, config);
 		colorPicker.on('input:end', updateLight);
+		currentColor = v ? colorPicker.color.hexString : undefined;
 	};
 
 	// Update color picker when entity changes
@@ -133,15 +132,19 @@
 		const hs = entity.attributes.hs_color ?? [0, 0];
 		const v = haToIroBrightness(entity.attributes.brightness ?? 0);
 
-		// Only update if values are different to prevent loops
-		const currentColor = colorPicker.color;
+		console.log(colorPicker.color);
+
+		// Only update if values are different to prevent jitter
+		const pickerColor = colorPicker.color;
 		if (
-			Math.abs(currentColor.hsv.h - hs[0]) > 0.1 ||
-			Math.abs(currentColor.hsv.s - hs[1]) > 0.1 ||
-			Math.abs(currentColor.hsv.v - v) > 0.1
+			Math.abs(pickerColor.hsv.h - hs[0]) > 4 ||
+			Math.abs(pickerColor.hsv.s - hs[1]) > 4 ||
+			Math.abs(pickerColor.hsv.v - v) > 2
 		) {
 			colorPicker.color.set({ h: hs[0], s: hs[1], v });
 		}
+
+		currentColor = v ? colorPicker.color.hexString : undefined;
 	};
 
 	// Lifecycle
@@ -155,28 +158,25 @@
 	});
 </script>
 
-<button
-	class="flex justify-between gap-4 rounded-xl border border-white/10 bg-white/10 p-4 shadow"
-	onclick={toggleLight}
+<div
+	class="flex flex-col items-center justify-center gap-4 rounded-xl border border-white/10 bg-white/10 p-4 shadow backdrop-blur-2xl"
 >
-	<div class="flex items-center gap-1">
-		<SvgIcon type="mdi" path={entity.attributes.icon ?? mdiLightSwitch} size="20" />
-		<span>{entity.attributes.friendly_name ?? entity.entity_id}</span>
-	</div>
+	<button class="flex w-full justify-between gap-2 rounded-xl" onclick={toggleLight}>
+		<div class="flex items-center gap-1">
+			<SvgIcon type="mdi" path={entity.attributes.icon ?? mdiLightSwitch} size="20" />
+			<span>{entity.attributes.friendly_name ?? entity.entity_id}</span>
+		</div>
 
-	<label class="inline-flex cursor-pointer items-center">
-		<input type="checkbox" checked={entity.state === 'on'} class="peer sr-only" />
-		<div
-			class="peer relative h-6 w-11 rounded-full bg-gray-700 outline-none after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-cyan-500 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
-		></div>
-	</label>
-</button>
-
-<div class="flex flex-col gap-3">
-	<div class="flex justify-center rounded-xl border border-white/10 bg-white/10 p-4 shadow">
-		<div
-			class="drop-shadow {entity.state === 'on' ? '' : 'pointer-events-none opacity-30 contrast-0'}"
-			bind:this={pickerDiv}
-		></div>
-	</div>
+		<label class="inline-flex cursor-pointer items-center">
+			<input type="checkbox" checked={entity.state === 'on'} class="peer sr-only" />
+			<div
+				class="peer relative h-6 w-11 rounded-full outline-none after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
+				style:background-color={currentColor ?? 'rgba(255 255 255 / .1)'}
+			></div>
+		</label>
+	</button>
+	<div
+		class="drop-shadow {entity.state === 'on' ? '' : 'pointer-events-none hidden'}"
+		bind:this={pickerDiv}
+	></div>
 </div>

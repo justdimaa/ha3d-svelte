@@ -26,7 +26,7 @@
 
 /* calendar */
 .flatpickr-calendar {
-    @apply hidden backdrop-blur rounded-xl border border-white/10 text-white bg-white/10 font-ubuntu p-4 gap-4
+    @apply hidden backdrop-blur-2xl rounded-xl border border-white/10 text-white bg-white/10 font-ubuntu p-4 gap-4 shadow
 }
 
 .flatpickr-calendar.open {
@@ -34,7 +34,7 @@
 }
 
 .flatpickr-months {
-    @apply flex justify-between gap-4
+    @apply flex justify-between gap-2
 }
 
 .flatpickr-month {
@@ -52,7 +52,7 @@
 }
 
 .flatpickr-current-month {
-    @apply flex flex-col gap-4 justify-center
+    @apply flex flex-col gap-2 justify-center
 }
 
 .numInputWrapper {

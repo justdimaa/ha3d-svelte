@@ -41,7 +41,9 @@
 <span class="text-2xl font-bold">Add Entity</span>
 <span>Select the entity you want to add to the mesh:</span>
 
-<div class="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4">
+<div
+	class="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 shadow backdrop-blur-2xl"
+>
 	<SvgIcon type="mdi" path={mdiMagnify} size="20" />
 	<input
 		class="h-12 grow bg-transparent outline-none"
@@ -51,10 +53,10 @@
 	/>
 </div>
 
-<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-2">
 	{#each Object.entries(filteredEntities) as [id, entity], idx (id)}
 		<button
-			class="flex items-center justify-between gap-4 overflow-hidden rounded-xl border border-white/10 bg-white/10 p-4 hover:bg-white/20"
+			class="flex items-center justify-between gap-2 overflow-hidden rounded-xl border border-white/10 bg-white/10 p-4 shadow backdrop-blur-2xl hover:bg-white/20"
 			onclick={() => onToggleEntity(entity)}
 		>
 			<div class="flex items-center gap-2 truncate">
@@ -68,7 +70,7 @@
 					class="peer sr-only"
 				/>
 				<div
-					class="peer relative h-6 w-11 rounded-full bg-gray-700 outline-none after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-cyan-500 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
+					class="peer relative h-6 w-11 rounded-full bg-white/10 outline-none after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-cyan-500 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
 				></div>
 			</label>
 		</button>
