@@ -65,29 +65,61 @@
 
 		const hs = entity.attributes.hs_color ?? [0, 0];
 		const v = haToIroBrightness(entity.attributes.brightness ?? 0);
+		const colorModes: string[] = entity.attributes.supported_color_modes;
+
+		const layout = [];
+
+		if (
+			colorModes.includes('xy') ||
+			colorModes.includes('rgbww') ||
+			colorModes.includes('rgbw') ||
+			colorModes.includes('rgb') ||
+			colorModes.includes('hs')
+		) {
+			layout.push({
+				component: iro.ui.Wheel
+			});
+			layout.push({
+				component: iro.ui.Slider,
+				options: { sliderType: 'saturation' }
+			});
+		}
+
+		if (
+			colorModes.includes('xy') ||
+			colorModes.includes('rgbww') ||
+			colorModes.includes('rgbw') ||
+			colorModes.includes('rgb') ||
+			colorModes.includes('hs') ||
+			colorModes.includes('color_temp') ||
+			colorModes.includes('brightness')
+		) {
+			layout.push({
+				component: iro.ui.Slider,
+				options: { sliderType: 'value' }
+			});
+		}
+
+		if (
+			colorModes.includes('xy') ||
+			colorModes.includes('rgbww') ||
+			colorModes.includes('rgbw') ||
+			colorModes.includes('rgb') ||
+			colorModes.includes('hs') ||
+			colorModes.includes('color_temp')
+		) {
+			layout.push({
+				component: iro.ui.Slider,
+				options: { sliderType: 'kelvin' }
+			});
+		}
 
 		const config: ColorPickerProps = {
 			color: { h: hs[0], s: hs[1], v },
 			layoutDirection: 'vertical',
 			padding: 4,
 			wheelLightness: false,
-			layout: [
-				{
-					component: iro.ui.Wheel
-				},
-				{
-					component: iro.ui.Slider,
-					options: { sliderType: 'saturation' }
-				},
-				{
-					component: iro.ui.Slider,
-					options: { sliderType: 'value' }
-				},
-				{
-					component: iro.ui.Slider,
-					options: { sliderType: 'kelvin' }
-				}
-			]
+			layout
 		};
 
 		colorPicker = iro.ColorPicker(pickerDiv, config);
@@ -143,7 +175,7 @@
 <div class="flex flex-col gap-3">
 	<div class="flex justify-center rounded-xl border border-white/10 bg-white/10 p-4 shadow">
 		<div
-			class="drop-shadow {entity.state === 'on' ? '' : 'pointer-events-none grayscale-[0.5]'}"
+			class="drop-shadow {entity.state === 'on' ? '' : 'pointer-events-none opacity-30 contrast-0'}"
 			bind:this={pickerDiv}
 		></div>
 	</div>
