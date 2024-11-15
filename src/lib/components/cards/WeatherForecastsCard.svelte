@@ -5,6 +5,7 @@
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import { onMount } from 'svelte';
 	import { homeApi } from '../../../stores/global';
+	import { getWeatherIcon } from '../../../utils/weather';
 
 	interface Props {
 		weatherEntity: HassEntity;
@@ -44,7 +45,6 @@
 		await $homeApi?.subscribeMessage(
 			(msg) => {
 				if (!msg.forecast) return;
-				console.log(msg.forecast[0]);
 				forecasts = msg.forecast;
 			},
 			{
@@ -62,7 +62,7 @@
 			class="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/10 px-4 py-2 shadow backdrop-blur-2xl"
 		>
 			<span class="text-neutral-300">{DateTime.fromISO(forecast.datetime).weekdayShort}</span>
-			<SvgIcon type="mdi" path={mdiWeatherPartlyCloudy} size="48"></SvgIcon>
+			<SvgIcon type="mdi" path={getWeatherIcon(forecast.condition)} size="48"></SvgIcon>
 			<span class="text-xl font-bold">{Math.round(forecast.temperature)}°</span>
 		</div>
 	{/each}
