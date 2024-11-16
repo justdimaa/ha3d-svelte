@@ -59,10 +59,12 @@
 <div class="flex gap-2 overflow-x-auto">
 	{#each forecastsDisplay() as forecast}
 		<div
-			class="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/10 px-4 py-2 shadow backdrop-blur-2xl"
+			class="flex grow flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/10 px-4 py-2 shadow backdrop-blur-2xl"
 		>
 			<span class="text-neutral-300">{DateTime.fromISO(forecast.datetime).weekdayShort}</span>
-			<SvgIcon type="mdi" path={getWeatherIcon(forecast.condition)} size="48"></SvgIcon>
+			<div class="w-8">
+				{@html getWeatherIcon(forecast?.condition)}
+			</div>
 			<span class="text-xl font-bold">{Math.round(forecast.temperature)}°</span>
 		</div>
 	{/each}

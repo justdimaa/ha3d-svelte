@@ -30,21 +30,20 @@
 </script>
 
 <div
-	class="relative flex w-full flex-col rounded-xl border border-white/10 bg-white/10 px-4 py-2 shadow backdrop-blur-2xl"
+	class="relative flex w-full justify-between rounded-xl border border-white/10 bg-white/10 px-4 py-2 shadow backdrop-blur-2xl"
 >
-	<SvgIcon
-		type="mdi"
-		path={getWeatherIcon(currentForecast?.condition)}
-		size="96"
-		class="absolute ml-auto self-end"
-	></SvgIcon>
-	<span class="text-2xl">Weather</span>
-	<div class="flex items-center gap-1 text-neutral-300">
-		<SvgIcon type="mdi" path={mdiMapMarkerOutline} size="18" class="-ml-1"></SvgIcon>
-		<span>Earth</span>
+	<div class="flex flex-col">
+		<span class="text-2xl">Weather</span>
+		<div class="flex items-center gap-1 text-neutral-300">
+			<SvgIcon type="mdi" path={mdiMapMarkerOutline} size="18" class="-ml-1"></SvgIcon>
+			<span>Earth</span>
+		</div>
+		<div class="flex items-end">
+			<span class="text-7xl">{Math.round(currentForecast?.temperature)}°</span>
+			<span class="mb-1 text-neutral-300">{getWeatherLabel(currentForecast?.condition)}</span>
+		</div>
 	</div>
-	<div class="flex items-end">
-		<span class="text-7xl">{Math.round(currentForecast?.temperature)}°</span>
-		<span class="mb-1 text-neutral-300">{getWeatherLabel(currentForecast?.condition)}</span>
+	<div class="aspect-square">
+		{@html getWeatherIcon(currentForecast?.condition)}
 	</div>
 </div>
