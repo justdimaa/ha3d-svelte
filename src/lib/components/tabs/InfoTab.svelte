@@ -12,7 +12,7 @@
 
 <span class="text-2xl">Debug</span>
 <div
-	class="flex justify-center rounded-xl border border-white/10 bg-white/10 p-4 shadow backdrop-blur-2xl"
+	class="flex justify-center rounded-xl border border-white/10 bg-white/10 p-4 shadow lg:backdrop-blur-2xl"
 >
 	<span class="line-clamp-2 flex w-full break-all text-sm">{JSON.stringify(selectedEntities)}</span>
 </div>

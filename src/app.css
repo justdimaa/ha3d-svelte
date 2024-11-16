@@ -4,6 +4,11 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+    /* because fuck mobile browsers with their bounce shit */
+    @apply overscroll-none select-none lg:select-auto;
+}
+
 /* width */
 ::-webkit-scrollbar {
     @apply h-2 w-2
@@ -26,7 +31,7 @@
 
 /* calendar */
 .flatpickr-calendar {
-    @apply hidden backdrop-blur-2xl rounded-xl border border-white/10 text-white bg-white/10 font-ubuntu p-4 gap-4 shadow
+    @apply hidden lg:backdrop-blur-2xl rounded-xl border border-white/10 text-white bg-white/10 font-ubuntu p-4 gap-4 shadow
 }
 
 .flatpickr-calendar.open {

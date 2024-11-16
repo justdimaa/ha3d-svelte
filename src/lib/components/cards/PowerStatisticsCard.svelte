@@ -126,6 +126,6 @@
 	});
 </script>
 
-<div class="rounded-xl border border-white/10 bg-white/10 shadow backdrop-blur-2xl">
+<div class="rounded-xl border border-white/10 bg-white/10 shadow lg:backdrop-blur-2xl">
 	<div class="text-black" bind:this={chartDiv}></div>
 </div>

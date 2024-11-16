@@ -76,7 +76,7 @@
 
 <div class="flex flex-col gap-2 pb-2" bind:this={calendarDiv}>
 	<button
-		class="flex h-12 cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 shadow backdrop-blur-2xl"
+		class="flex h-12 cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 shadow lg:backdrop-blur-2xl"
 		onclick={() => timePicker.open()}
 	>
 		<SvgIcon type="mdi" path={mdiCalendarOutline} size="20" />
@@ -92,7 +92,7 @@
 <div class="grid gap-2">
 	{#each sortedLogs as event}
 		<div
-			class="flex flex-col rounded-xl border border-white/10 bg-white/10 px-4 py-2 shadow backdrop-blur-2xl"
+			class="flex flex-col rounded-xl border border-white/10 bg-white/10 px-4 py-2 shadow lg:backdrop-blur-2xl"
 		>
 			<div class="flex items-center gap-1">
 				<SvgIcon type="mdi" path={mdiFunction} size="16"></SvgIcon>

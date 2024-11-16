@@ -159,7 +159,7 @@
 </script>
 
 <div
-	class="flex flex-col items-center justify-center gap-4 rounded-xl border border-white/10 bg-white/10 p-4 shadow backdrop-blur-2xl"
+	class="flex flex-col items-center justify-center gap-4 rounded-xl border border-white/10 bg-white/10 p-4 shadow lg:backdrop-blur-2xl"
 >
 	<button class="flex w-full justify-between gap-2 rounded-xl" onclick={toggleLight}>
 		<div class="flex items-center gap-1">

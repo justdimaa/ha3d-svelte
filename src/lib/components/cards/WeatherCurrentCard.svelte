@@ -30,7 +30,7 @@
 </script>
 
 <div
-	class="relative flex w-full justify-between rounded-xl border border-white/10 bg-white/10 px-4 py-2 shadow backdrop-blur-2xl"
+	class="relative flex w-full justify-between rounded-xl border border-white/10 bg-white/10 px-4 py-2 shadow lg:backdrop-blur-2xl"
 >
 	<div class="flex flex-col">
 		<span class="text-2xl">Weather</span>

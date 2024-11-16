@@ -3,7 +3,7 @@
 	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import { getEntityIcon } from '../../../utils/icons';
-	import { mdiDevices, mdiMagnify } from '@mdi/js';
+	import { mdiMagnify } from '@mdi/js';
 
 	// todo: tab shouldnt disappear after selected first entity
 
@@ -38,11 +38,11 @@
 	}
 </script>
 
-<span class="text-2xl font-bold">Add Entity</span>
-<span>Select the entity you want to add to the mesh:</span>
+<span class="text-2xl font-bold">Add entity</span>
+<span>Select the entity you want to add to the object:</span>
 
 <div
-	class="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 shadow backdrop-blur-2xl"
+	class="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 shadow lg:backdrop-blur-2xl"
 >
 	<SvgIcon type="mdi" path={mdiMagnify} size="20" />
 	<input
@@ -56,7 +56,7 @@
 <div class="flex flex-col gap-2">
 	{#each Object.entries(filteredEntities) as [id, entity], idx (id)}
 		<button
-			class="flex items-center justify-between gap-2 overflow-hidden rounded-xl border border-white/10 bg-white/10 p-4 shadow backdrop-blur-2xl hover:bg-white/20"
+			class="flex items-center justify-between gap-2 overflow-hidden rounded-xl border border-white/10 bg-white/10 p-4 shadow hover:bg-white/20 lg:backdrop-blur-2xl"
 			onclick={() => onToggleEntity(entity)}
 		>
 			<div class="flex items-center gap-2 truncate">
