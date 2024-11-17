@@ -40,8 +40,6 @@
 		"@jaames/iro": "^5.5.2",
 		"@jamescoyle/svelte-icon": "^0.1.1",
 		"@mdi/js": "^7.4.47",
-		"@threlte/core": "^8.0.0-next.30",
-		"@threlte/extras": "^9.0.0-next.38",
 		"apexcharts": "^4.0.0",
 		"flatpickr": "^4.6.13",
 		"home-assistant-js-websocket": "^9.4.0",
