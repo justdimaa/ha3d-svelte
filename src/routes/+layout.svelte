@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { HassEntities } from 'home-assistant-js-websocket';
 	import '../app.css';
-	import { connect, entities, homeApi, loadMeshes, saveMeshes, tempMeshes } from '../stores/global';
+	import { connect, entities, homeApi, tempMeshes } from '../stores/global';
 	import { onMount, type Snippet } from 'svelte';
+	import { getOrCreateMeshesHelper, updateMeshesHelper } from '$lib/ha/api';
 
 	interface Props {
 		children?: Snippet;
@@ -11,11 +12,11 @@
 	let { children }: Props = $props();
 
 	// removes deleted HA entities from the meshes
-	function updateMeshStorage(state: HassEntities) {
+	const updateMeshStorage = async (state: HassEntities) => {
 		let isDirty = false;
-		let storageMeshes = loadMeshes();
+		let meshes = await getOrCreateMeshesHelper($homeApi!, state);
 
-		for (let [_, mesh] of Object.entries(storageMeshes)) {
+		for (let [_, mesh] of Object.entries(meshes)) {
 			for (let [idx, eid] of mesh.entity_ids.entries()) {
 				if (!(eid in state)) {
 					mesh.entity_ids.splice(idx, 1);
@@ -23,29 +24,30 @@
 				}
 
 				if (mesh.entity_ids.length == 0) {
-					delete storageMeshes[mesh.id];
+					delete meshes[mesh.id];
 				}
 			}
 		}
 
 		if (isDirty) {
-			saveMeshes(storageMeshes);
+			await updateMeshesHelper($homeApi!, meshes);
 		}
 
 		if ($tempMeshes == undefined || isDirty) {
-			$tempMeshes = storageMeshes;
+			$tempMeshes = meshes;
 		}
-	}
+	};
 
 	onMount(async () => {
 		if (!$homeApi) {
 			await connect();
 		}
 
-		entities.subscribe((state) => {
+		entities.subscribe(async (state) => {
 			if (!state) return;
 			if (Object.entries(state).length == 0) return;
-			updateMeshStorage(state);
+
+			await updateMeshStorage(state);
 		});
 	});
 </script>

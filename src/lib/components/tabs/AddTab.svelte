@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { entities, selectedMesh, tempMeshes } from '../../../stores/global';
+	import { entities, homeApi, selectedMesh, tempMeshes } from '../../../stores/global';
 	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import { getEntityIcon } from '../../../utils/icons';
 	import { mdiMagnify } from '@mdi/js';
+	import { updateMeshesHelper } from '$lib/ha/api';
 
 	// todo: tab shouldnt disappear after selected first entity
 
@@ -21,7 +22,7 @@
 
 	let filterText = $state('');
 
-	function onToggleEntity(entity: HassEntity) {
+	async function onToggleEntity(entity: HassEntity) {
 		const meshData = $tempMeshes[$selectedMesh!] || { id: $selectedMesh!, entity_ids: [] };
 		const entityId = entity.entity_id;
 		const index = meshData.entity_ids.indexOf(entityId);
@@ -34,7 +35,7 @@
 
 		$tempMeshes[$selectedMesh!] = meshData.entity_ids.length > 0 ? meshData : undefined;
 		$tempMeshes = { ...$tempMeshes }; // forces svelte to update
-		localStorage.setItem('meshes', JSON.stringify($tempMeshes));
+		await updateMeshesHelper($homeApi!, $tempMeshes);
 	}
 </script>
 
@@ -57,7 +58,7 @@
 	{#each Object.entries(filteredEntities) as [id, entity], idx (id)}
 		<button
 			class="flex items-center justify-between gap-2 overflow-hidden rounded-xl border border-white/10 bg-white/10 p-4 shadow hover:bg-white/20 lg:backdrop-blur-2xl"
-			onclick={() => onToggleEntity(entity)}
+			onclick={async () => await onToggleEntity(entity)}
 		>
 			<div class="flex items-center gap-2 truncate">
 				<SvgIcon class="flex-shrink-0" type="mdi" path={getEntityIcon(entity)} size="20" />
