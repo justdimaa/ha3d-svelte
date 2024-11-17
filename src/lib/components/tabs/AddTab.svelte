@@ -16,7 +16,14 @@
 
 	let filteredEntities = $derived(
 		Object.entries($entities)
-			.filter(([id, _]) => id.includes(filterText))
+			.filter(([id, e]) => {
+				const ft = filterText.toLocaleLowerCase();
+				return (
+					!e.attributes.hidden &&
+					(id.toLocaleLowerCase().includes(ft) ||
+						e.attributes.friendly_name?.toLocaleLowerCase().includes(ft))
+				);
+			})
 			.map(([_, e]) => e)
 	);
 
@@ -55,14 +62,21 @@
 </div>
 
 <div class="flex flex-col gap-2">
-	{#each Object.entries(filteredEntities) as [id, entity], idx (id)}
+	{#each Object.entries(filteredEntities) as [_, entity]}
 		<button
-			class="flex items-center justify-between gap-2 overflow-hidden rounded-xl border border-white/10 bg-white/10 p-4 shadow hover:bg-white/20 lg:backdrop-blur-2xl"
+			class="flex items-center justify-between gap-2 overflow-hidden rounded-xl border border-white/10 bg-white/10 px-4 py-2 shadow hover:bg-white/20 lg:backdrop-blur-2xl"
 			onclick={async () => await onToggleEntity(entity)}
 		>
-			<div class="flex items-center gap-2 truncate">
-				<SvgIcon class="flex-shrink-0" type="mdi" path={getEntityIcon(entity)} size="20" />
-				<span class="truncate">{entity.entity_id}</span>
+			<div class="flex gap-2 truncate">
+				<SvgIcon class="mt-1 flex-shrink-0" type="mdi" path={getEntityIcon(entity)} size="20" />
+				<div class="flex flex-col truncate text-left">
+					<span class="truncate" title={entity.attributes.friendly_name ?? '-'}
+						>{entity.attributes.friendly_name ?? '-'}</span
+					>
+					<span class="truncate text-sm text-white/80" title={entity.entity_id}
+						>{entity.entity_id}</span
+					>
+				</div>
 			</div>
 			<label class="pointer-events-none inline-flex cursor-pointer items-center">
 				<input
