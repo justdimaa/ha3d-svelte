@@ -3,7 +3,7 @@
 	import '../app.css';
 	import { connect, entities, homeApi, tempMeshes } from '../stores/global';
 	import { onMount, type Snippet } from 'svelte';
-	import { getOrCreateMeshesHelper, updateMeshesHelper } from '$lib/ha/api';
+	import { getConfig, updateConfig } from '$lib/ha/api';
 
 	interface Props {
 		children?: Snippet;
@@ -14,9 +14,9 @@
 	// removes deleted HA entities from the meshes
 	const updateMeshStorage = async (state: HassEntities) => {
 		let isDirty = false;
-		let meshes = await getOrCreateMeshesHelper($homeApi!, state);
+		let cfg = await getConfig();
 
-		for (let [_, mesh] of Object.entries(meshes)) {
+		for (let [_, mesh] of Object.entries(cfg.meshes)) {
 			for (let [idx, eid] of mesh.entity_ids.entries()) {
 				if (!(eid in state)) {
 					mesh.entity_ids.splice(idx, 1);
@@ -24,18 +24,16 @@
 				}
 
 				if (mesh.entity_ids.length == 0) {
-					delete meshes[mesh.id];
+					delete cfg.meshes[mesh.id];
 				}
 			}
 		}
 
 		if (isDirty) {
-			await updateMeshesHelper($homeApi!, meshes);
+			await updateConfig(cfg);
 		}
 
-		if ($tempMeshes == undefined || isDirty) {
-			$tempMeshes = meshes;
-		}
+		$tempMeshes = cfg.meshes;
 	};
 
 	onMount(async () => {

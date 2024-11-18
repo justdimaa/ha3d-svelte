@@ -1,46 +1,43 @@
-import type { Connection, HassEntities } from 'home-assistant-js-websocket';
+import { type AuthData } from 'home-assistant-js-websocket';
+import type { Config } from '../types/api';
 
-export const getOrCreateMeshesHelper = async (
-	api: Connection,
-	entities: HassEntities
-): Promise<any> => {
-	const entity = entities['input_text.meshes'];
+export const getConfig = async (): Promise<Config> => {
+	let accessToken = getAuthToken();
+	if (!accessToken) throw new Error('unauthorized');
 
-	if (!entity) {
-		await createMeshesHelper(api);
-		return {};
-	}
-
-	try {
-		let meshes = JSON.parse(entity.state);
-		return meshes;
-	} catch (ex) {
-		// reset to inital state if the string is malformed
-		console.error('meshes json malformed: ' + ex);
-		await updateMeshesHelper(api, {});
-		return {};
-	}
-};
-
-const createMeshesHelper = async (api: Connection) => {
-	await api.sendMessagePromise({
-		type: 'input_text/create',
-		name: 'meshes',
-		icon: 'mdi:cube-scan',
-		max: 10000
+	const cfg = await fetch('/api/config', {
+		headers: {
+			authorization: 'Bearer ' + accessToken
+		}
 	});
 
-	await updateMeshesHelper(api, {});
+	if (!cfg.ok) {
+		throw new Error(cfg.statusText);
+	}
+
+	return cfg.json();
 };
 
-export const updateMeshesHelper = async (api: Connection, meshes: any) => {
-	let value = JSON.stringify(meshes);
+export const updateConfig = async (cfg: Config) => {
+	let accessToken = getAuthToken();
+	if (!accessToken) return;
 
-	await api!.sendMessagePromise({
-		type: 'call_service',
-		domain: 'input_text',
-		service: 'set_value',
-		return_response: false,
-		service_data: { value, entity_id: 'input_text.meshes' }
+	let value = JSON.stringify(cfg);
+
+	await fetch('/api/config', {
+		method: 'PUT',
+		headers: {
+			authorization: 'Bearer ' + accessToken,
+			'content-type': 'application/json'
+		},
+		body: value
 	});
+};
+
+const getAuthToken = (): string | undefined => {
+	const hassTokensStr = localStorage.getItem('hassTokens');
+	if (!hassTokensStr) return undefined;
+
+	const hassTokens: AuthData = JSON.parse(hassTokensStr);
+	return hassTokens.access_token;
 };

@@ -21,5 +21,8 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+# used by the api server
+/data
+
 # temporary, might aswell remove this line later, todo: example room later with upload function
 /static/room.glb

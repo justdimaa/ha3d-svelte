@@ -4,7 +4,7 @@
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import { getEntityIcon } from '../../../utils/icons';
 	import { mdiMagnify } from '@mdi/js';
-	import { updateMeshesHelper } from '$lib/ha/api';
+	import { updateConfig } from '$lib/ha/api';
 
 	// todo: tab shouldnt disappear after selected first entity
 
@@ -40,9 +40,14 @@
 			meshData.entity_ids.splice(index, 1);
 		}
 
-		$tempMeshes[$selectedMesh!] = meshData.entity_ids.length > 0 ? meshData : undefined;
+		if (meshData.entity_ids.length > 0) {
+			$tempMeshes[$selectedMesh!] = meshData;
+		} else {
+			delete $tempMeshes[$selectedMesh!];
+		}
+
 		$tempMeshes = { ...$tempMeshes }; // forces svelte to update
-		await updateMeshesHelper($homeApi!, $tempMeshes);
+		await updateConfig({ meshes: $tempMeshes });
 	}
 </script>
 

@@ -11,6 +11,7 @@ import {
 } from 'home-assistant-js-websocket';
 import { writable, type Writable } from 'svelte/store';
 import type { SelectedMesh } from '$lib';
+import { HA_PUB_URL } from '$env/static/public';
 
 export type SelectedMeshes = {
 	[id: string]: SelectedMesh;
@@ -29,7 +30,7 @@ export const cameraSettings = writable({
 });
 
 async function loadAuthTokens(): Promise<AuthData | null> {
-	let dataStr = localStorage.getItem('auth');
+	let dataStr = localStorage.getItem('hassTokens');
 
 	if (dataStr == null) {
 		return null;
@@ -39,7 +40,7 @@ async function loadAuthTokens(): Promise<AuthData | null> {
 }
 
 function saveAuthTokens(data: AuthData | null) {
-	localStorage.setItem('auth', JSON.stringify(data));
+	localStorage.setItem('hassTokens', JSON.stringify(data));
 }
 
 export const connect = async () => {
@@ -53,7 +54,7 @@ export const connect = async () => {
 		});
 	} catch (err) {
 		if (err === ERR_HASS_HOST_REQUIRED) {
-			const hassUrl = prompt('What host to connect to?', 'http://localhost:8123');
+			const hassUrl = HA_PUB_URL ?? prompt('What host to connect to?', 'http://localhost:8123');
 			// Redirect user to log in on their instance
 			auth = await getAuth({
 				hassUrl,
