@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { entities, homeApi, selectedMesh, tempMeshes } from '../../../stores/global';
 	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
-	import type { HassEntity } from 'home-assistant-js-websocket';
+	import { type HassEntity } from 'home-assistant-js-websocket';
 	import { getEntityIcon } from '../../../utils/icons';
 	import { mdiMagnify } from '@mdi/js';
-	import { updateConfig } from '$lib/ha/api';
+	import { getConfig, getScene, getScenes, updateConfig, updateScene } from '$lib/ha/api';
 
 	// todo: tab shouldnt disappear after selected first entity
 
@@ -30,24 +30,43 @@
 	let filterText = $state('');
 
 	async function onToggleEntity(entity: HassEntity) {
-		const meshData = $tempMeshes[$selectedMesh!] || { id: $selectedMesh!, entity_ids: [] };
+		const config = await getConfig();
+
+		let currentSceneId = config.defaultSceneId;
+
+		const meshData = $tempMeshes[$selectedMesh!] || {
+			id: $selectedMesh!,
+			entityIds: [] // Changed from snake_case
+		};
+
 		const entityId = entity.entity_id;
-		const index = meshData.entity_ids.indexOf(entityId);
+		const index = meshData.entityIds.indexOf(entityId);
 
 		if (index === -1) {
-			meshData.entity_ids.push(entityId);
+			meshData.entityIds.push(entityId);
 		} else {
-			meshData.entity_ids.splice(index, 1);
+			meshData.entityIds.splice(index, 1);
 		}
 
-		if (meshData.entity_ids.length > 0) {
+		// Update local state first (optimistic update)
+		if (meshData.entityIds.length > 0) {
 			$tempMeshes[$selectedMesh!] = meshData;
 		} else {
 			delete $tempMeshes[$selectedMesh!];
 		}
 
-		$tempMeshes = { ...$tempMeshes }; // forces svelte to update
-		await updateConfig({ meshes: $tempMeshes });
+		// Force Svelte reactivity
+		$tempMeshes = { ...$tempMeshes };
+
+		// Update using new API
+		try {
+			await updateScene(currentSceneId, {
+				meshes: $tempMeshes
+			});
+		} catch (error) {
+			console.error('Failed to update scene:', error);
+			// Could add error handling/rollback here
+		}
 	}
 </script>
 

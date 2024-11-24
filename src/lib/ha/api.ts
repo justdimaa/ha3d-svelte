@@ -1,37 +1,184 @@
 import { type AuthData } from 'home-assistant-js-websocket';
-import type { Config } from '../types/api';
+import type { Config, Mesh, Scene } from '../types/api';
 
 export const getConfig = async (): Promise<Config> => {
-	let accessToken = getAuthToken();
-	if (!accessToken) throw new Error('unauthorized');
+	const accessToken = getAuthToken();
+	if (!accessToken) {
+		throw new Error('No authentication token available');
+	}
 
-	const cfg = await fetch('/api/config', {
+	const response = await fetch('/api/config', {
 		headers: {
-			authorization: 'Bearer ' + accessToken
+			Authorization: `Bearer ${accessToken}`
 		}
 	});
 
-	if (!cfg.ok) {
-		throw new Error(cfg.statusText);
+	if (!response.ok) {
+		throw new Error(`Failed to fetch config: ${response.statusText}`);
 	}
 
-	return cfg.json();
+	const data = await response.json();
+	return data;
 };
 
-export const updateConfig = async (cfg: Config) => {
-	let accessToken = getAuthToken();
-	if (!accessToken) return;
+export const updateConfig = async (cfg: Partial<Config>): Promise<Config> => {
+	const accessToken = getAuthToken();
+	if (!accessToken) {
+		throw new Error('No authentication token available');
+	}
 
-	let value = JSON.stringify(cfg);
-
-	await fetch('/api/config', {
-		method: 'PUT',
+	const response = await fetch('/api/config', {
+		method: 'PATCH',
 		headers: {
-			authorization: 'Bearer ' + accessToken,
-			'content-type': 'application/json'
+			Authorization: `Bearer ${accessToken}`,
+			'Content-Type': 'application/json'
 		},
-		body: value
+		body: JSON.stringify(cfg)
 	});
+
+	if (!response.ok) {
+		throw new Error(`Failed to update config: ${response.statusText}`);
+	}
+
+	const data = await response.json();
+	return data;
+};
+
+export const getScenes = async () => {
+	let accessToken = getAuthToken();
+	if (!accessToken) {
+		throw new Error('No authentication token available');
+	}
+
+	const scenes = await fetch('/api/scenes', {
+		headers: {
+			Authorization: `Bearer ${accessToken}`
+		}
+	});
+
+	if (!scenes.ok) {
+		throw new Error(scenes.statusText);
+	}
+
+	return scenes.json();
+};
+export const getScene = async (sceneId: string): Promise<Scene> => {
+	const accessToken = getAuthToken();
+	if (!accessToken) {
+		throw new Error('No authentication token available');
+	}
+
+	const response = await fetch(`/api/scenes/${sceneId}`, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`
+		}
+	});
+
+	if (!response.ok) {
+		throw new Error(`Failed to fetch scene: ${response.statusText}`);
+	}
+
+	const data = await response.json();
+	return data;
+};
+
+export const createScene = async (data: SceneCreate): Promise<Scene> => {
+	const accessToken = getAuthToken();
+	if (!accessToken) {
+		throw new Error('No authentication token available');
+	}
+
+	const formData = new FormData();
+	formData.append('file', data.file);
+
+	// Create payload_json with metadata
+	const metadata = {
+		name: data.name || 'New Scene',
+		meshes: data.meshes || {}
+	};
+	formData.append('payload_json', JSON.stringify(metadata));
+
+	const response = await fetch('/api/scenes', {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${accessToken}`
+		},
+		body: formData
+	});
+
+	if (!response.ok) {
+		throw new Error(`Failed to create scene: ${response.statusText}`);
+	}
+
+	const responseData = await response.json();
+	return responseData.scene;
+};
+
+export const updateScene = async (sceneId: string, updates: SceneUpdate): Promise<Scene> => {
+	const accessToken = getAuthToken();
+	if (!accessToken) {
+		throw new Error('No authentication token available');
+	}
+
+	// If file included, use FormData
+	if (updates.file) {
+		const formData = new FormData();
+		formData.append('file', updates.file);
+
+		// Add other updates as payload_json
+		const { file, ...metadata } = updates;
+		formData.append('payload_json', JSON.stringify(metadata));
+
+		const response = await fetch(`/api/scenes/${sceneId}`, {
+			method: 'PATCH',
+			headers: {
+				Authorization: `Bearer ${accessToken}`
+			},
+			body: formData
+		});
+
+		if (!response.ok) {
+			throw new Error(`Failed to update scene: ${response.statusText}`);
+		}
+
+		const data = await response.json();
+		return data.scene;
+	}
+
+	// No file, use JSON
+	const response = await fetch(`/api/scenes/${sceneId}`, {
+		method: 'PATCH',
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(updates)
+	});
+
+	if (!response.ok) {
+		throw new Error(`Failed to update scene: ${response.statusText}`);
+	}
+
+	const data = await response.json();
+	return data.scene;
+};
+
+export const deleteScene = async (sceneId: string): Promise<void> => {
+	const accessToken = getAuthToken();
+	if (!accessToken) {
+		throw new Error('No authentication token available');
+	}
+
+	const response = await fetch(`/api/scenes/${sceneId}`, {
+		method: 'DELETE',
+		headers: {
+			Authorization: `Bearer ${accessToken}`
+		}
+	});
+
+	if (!response.ok) {
+		throw new Error(`Failed to delete scene: ${response.statusText}`);
+	}
 };
 
 const getAuthToken = (): string | undefined => {
@@ -40,4 +187,13 @@ const getAuthToken = (): string | undefined => {
 
 	const hassTokens: AuthData = JSON.parse(hassTokensStr);
 	return hassTokens.access_token;
+};
+
+export type SceneCreate = {
+	name?: string;
+	meshes?: Record<string, Mesh>;
+	file: File;
+};
+export type SceneUpdate = Partial<Omit<Scene, 'id' | 'hash'>> & {
+	file?: File;
 };

@@ -3,7 +3,7 @@
 	import '../app.css';
 	import { connect, entities, homeApi, tempMeshes } from '../stores/global';
 	import { onMount, type Snippet } from 'svelte';
-	import { getConfig, updateConfig } from '$lib/ha/api';
+	import { getConfig, getScene, getScenes, updateScene } from '$lib/ha/api';
 
 	interface Props {
 		children?: Snippet;
@@ -13,27 +13,54 @@
 
 	// removes deleted HA entities from the meshes
 	const updateMeshStorage = async (state: HassEntities) => {
-		let isDirty = false;
-		let cfg = await getConfig();
+		try {
+			let isDirty = false;
+			const config = await getConfig();
 
-		for (let [_, mesh] of Object.entries(cfg.meshes)) {
-			for (let [idx, eid] of mesh.entity_ids.entries()) {
-				if (!(eid in state)) {
-					mesh.entity_ids.splice(idx, 1);
-					isDirty = true;
+			let sceneId = config.defaultSceneId;
+
+			if (!sceneId) {
+				const scenes = await getScenes();
+				if (scenes.length == 0) {
+					return;
 				}
 
-				if (mesh.entity_ids.length == 0) {
-					delete cfg.meshes[mesh.id];
+				sceneId = scenes[0].id;
+			}
+
+			const scene = await getScene(sceneId!);
+			if (!scene) return;
+
+			// Create new meshes object to track changes
+			const updatedMeshes = { ...scene.meshes };
+
+			for (const [meshId, mesh] of Object.entries(updatedMeshes)) {
+				// Filter out deleted entities
+				const validEntityIds = mesh.entityIds.filter((eid) => eid in state);
+
+				if (validEntityIds.length !== mesh.entityIds.length) {
+					isDirty = true;
+					if (validEntityIds.length === 0) {
+						// Remove mesh if no entities left
+						delete updatedMeshes[meshId];
+					} else {
+						// Update with remaining entities
+						updatedMeshes[meshId] = {
+							...mesh,
+							entityIds: validEntityIds
+						};
+					}
 				}
 			}
-		}
 
-		if (isDirty) {
-			await updateConfig(cfg);
-		}
+			if (isDirty) {
+				await updateScene(scene.id, { meshes: updatedMeshes });
+			}
 
-		$tempMeshes = cfg.meshes;
+			$tempMeshes = updatedMeshes;
+		} catch (error) {
+			console.error('Failed to update mesh storage:', error);
+		}
 	};
 
 	onMount(async () => {

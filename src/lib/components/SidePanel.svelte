@@ -42,7 +42,7 @@
 
 	let selected = $derived($selectedMesh ? $tempMeshes[$selectedMesh] : undefined);
 
-	let selectedEntities = $derived(selected?.entity_ids.map((i) => $entities[i]));
+	let selectedEntities = $derived(selected?.entityIds.map((i) => $entities[i]));
 
 	let _currentTab = $state(Tab.Controls);
 	let currentTab = $derived(selectedEntities ? _currentTab : Tab.AddEntity);

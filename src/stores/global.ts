@@ -10,12 +10,8 @@ import {
 	type HassUser
 } from 'home-assistant-js-websocket';
 import { writable, type Writable } from 'svelte/store';
-import type { SelectedMesh } from '$lib';
 import { HA_PUB_URL } from '$env/static/public';
-
-export type SelectedMeshes = {
-	[id: string]: SelectedMesh;
-};
+import type { Meshes } from '$lib/types/api';
 
 export const homeApi: Writable<Connection | undefined> = writable(undefined);
 export const user: Writable<HassUser> = writable();
@@ -23,7 +19,7 @@ export const entities: Writable<HassEntities> = writable({});
 export const selectedMesh: Writable<string | undefined> = writable(undefined);
 
 // todo: find an alternative where to store values
-export const tempMeshes: Writable<SelectedMeshes> = writable();
+export const tempMeshes: Writable<Meshes> = writable();
 
 export const cameraSettings = writable({
 	enableDamping: true

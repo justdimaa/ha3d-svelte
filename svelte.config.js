@@ -14,6 +14,9 @@ const config = {
 		adapter: adapter(),
 		env: {
 			publicPrefix: "HA_PUB_"
+		},
+		csrf: {
+			checkOrigin: false
 		}
 	}
 };
