@@ -2,6 +2,7 @@
 	import { DateTime } from 'luxon';
 	import { onDestroy, onMount } from 'svelte';
 	import { entities, homeApi } from '../../../stores/global';
+	import type { Connection } from 'home-assistant-js-websocket';
 
 	const today = DateTime.local().startOf('day');
 
@@ -86,7 +87,7 @@
 		}
 	});
 
-	homeApi.subscribe(async (api) => {
+	async function updateChart(api: Connection | undefined) {
 		if (!api) return;
 
 		let prefs = await api.sendMessagePromise({
@@ -107,12 +108,34 @@
 			types: ['change']
 		});
 
-		statSeries = Object.entries(stats).map(([id, data]) => ({
-			name: $entities[id]?.attributes.friendly_name ?? id,
-			data: data.map((d) => d.change.toFixed(2))
-		}));
+		statSeries = Object.entries(stats).map(([id, data]) => {
+			// Create array of 24 hours with zeros
+			const fullDayData = Array.from({ length: 24 }, (_, i) => ({
+				start: DateTime.utc().startOf('day').plus({ hours: i }).toMillis(),
+				change: 0
+			}));
 
-		chart.updateOptions(options);
+			// Fill in actual values
+			data.forEach((d) => {
+				// todo: does it have to be utc or local?
+				const hour = DateTime.fromMillis(d.start).toLocal().hour;
+				fullDayData[hour].change = Number(d.change.toFixed(2));
+			});
+
+			return {
+				name: $entities[id]?.attributes.friendly_name ?? id,
+				data: fullDayData.map((d) => ({
+					x: d.start,
+					y: d.change
+				}))
+			};
+		});
+
+		chart?.updateOptions(options);
+	}
+
+	$effect(() => {
+		updateChart($homeApi);
 	});
 
 	onMount(async () => {
