@@ -13,56 +13,39 @@ import {
 import { randomUUID } from 'crypto';
 import { existsSync, mkdir } from 'fs';
 import { z } from 'zod';
-import { DateTime } from 'luxon';
+import { mapDbSceneToApi } from '$lib/mappers/scene.js';
 
 const SCENES_DIR = './data/scenes';
-const CONFIG_PATH = './data/config.json';
 
 // Ensure directories exist
 if (!existsSync(SCENES_DIR)) {
 	mkdir(SCENES_DIR, { recursive: true });
 }
 
-export async function GET({ request }) {
+export async function GET({ request, locals }) {
 	try {
-		// Read all scene directories
-		const sceneDirs = await fs.readdir(SCENES_DIR);
-
-		// Collect all scene data
-		const scenes: Scene[] = [];
-
-		for (const dir of sceneDirs) {
-			const jsonPath = path.join(SCENES_DIR, dir, 'scene.json');
-
-			try {
-				await fs.access(jsonPath);
-				// File exists, try to read and parse it
-				try {
-					const sceneData = await fs.readFile(jsonPath, 'utf-8');
-					const scene = JSON.parse(sceneData);
-					scenes.push(scene);
-				} catch (parseErr) {
-					console.error(`Error parsing scene ${dir}:`, parseErr);
-					// Continue to next scene if parsing fails
-					continue;
+		const dbScenes = await locals.prisma.scene.findMany({
+			include: {
+				meshes: {
+					include: {
+						entities: true
+					}
 				}
-			} catch (accessErr) {
-				// Skip if file doesn't exist
-				continue;
 			}
-		}
+		});
 
-		return new Response(JSON.stringify({ scenes }), {
+		const apiScenes = dbScenes.map(mapDbSceneToApi);
+		return new Response(JSON.stringify({ scenes: apiScenes }), {
 			headers: { 'Content-Type': 'application/json' }
 		});
-	} catch (e) {
-		console.error('Error reading scenes:', e);
-		throw error(500, 'Failed to read scenes');
+	} catch (err) {
+		console.error('Error fetching scenes:', err);
+		throw error(500, 'Failed to fetch scenes');
 	}
 }
 
-export async function POST({ request }) {
-	let sceneDir: string | undefined;
+export async function POST({ request, locals }) {
+	let modelPath: string | undefined;
 
 	try {
 		if (!request.headers.get('content-type')?.includes('multipart/form-data')) {
@@ -81,36 +64,50 @@ export async function POST({ request }) {
 			return error(400, 'Missing or invalid GLB file');
 		}
 
+		// Parse and validate metadata
+		const parsed = JSON.parse(payloadJson);
+		let metadata = SceneSchema.parse(parsed);
+
 		// Validate GLB header early
 		const stream = await validateGLBFile(file);
-
-		// Create and validate scene before file operations
-		const now = DateTime.utc().toISO();
-		const metadata = JSON.parse(payloadJson);
 		const sceneId = randomUUID();
-		let newScene: Scene = {
-			id: sceneId,
-			name: metadata.name,
-			description: metadata.description,
-			createdAt: now,
-			updatedAt: now,
-			hash: '',
-			meshes: {}
-		};
 
-		// Validate scene structure before saving anything
-		const validatedScene = SceneSchema.parse(newScene);
+		// Create directory for GLB file
+		await fs.mkdir(SCENES_DIR, { recursive: true });
 
-		// Only now create directory and save files
-		sceneDir = path.join(SCENES_DIR, sceneId);
-		const jsonPath = path.join(sceneDir, 'scene.json');
+		// Save GLB and get hash
+		modelPath = path.join(SCENES_DIR, `${sceneId}.glb`);
+		const hash = await saveGLBFile(stream, modelPath);
 
-		await fs.mkdir(sceneDir, { recursive: true });
-		validatedScene.hash = await saveGLBFile(stream, sceneDir);
+		// Create scene in database
+		const dbScene = await locals.prisma.scene.create({
+			data: {
+				id: sceneId,
+				name: metadata.name,
+				description: metadata.description ?? '',
+				hash: hash,
+				meshes: {
+					create: Object.entries(metadata.meshes || {}).map(([id, mesh]) => ({
+						id,
+						Entities: {
+							create: mesh.entityIds.map((entityId) => ({
+								id: entityId
+							}))
+						}
+					}))
+				}
+			},
+			include: {
+				meshes: {
+					include: {
+						entities: true
+					}
+				}
+			}
+		});
 
-		await fs.writeFile(jsonPath, JSON.stringify(validatedScene, null, 2));
-
-		return new Response(JSON.stringify({ scene: validatedScene }), {
+		const apiScene = mapDbSceneToApi(dbScene);
+		return new Response(JSON.stringify({ scene: apiScene }), {
 			status: 201,
 			headers: {
 				'Content-Type': 'application/json',
@@ -118,9 +115,9 @@ export async function POST({ request }) {
 			}
 		});
 	} catch (err) {
-		if (sceneDir) {
+		if (modelPath) {
 			await fs
-				.rm(sceneDir, { recursive: true, force: true })
+				.rm(modelPath, { recursive: true, force: true })
 				.catch((cleanupErr) => console.error('Failed to cleanup:', cleanupErr));
 		}
 

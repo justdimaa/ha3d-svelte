@@ -4,22 +4,28 @@ import { error } from '@sveltejs/kit';
 
 const SCENES_DIR = './data/scenes';
 
-export async function GET({ request, params }) {
-	const sanitizedId = path.basename(params.slug); // Prevent path traversal
-	const sceneDir = path.join(SCENES_DIR, sanitizedId);
-	const filePath = path.join(sceneDir, 'scene.glb');
+export async function GET({ params, locals }) {
+	const dbScene = await locals.prisma.scene.findUnique({
+		where: { id: params.slug }
+	});
+
+	if (!dbScene) {
+		throw error(404, 'Scene not found');
+	}
+
+	const modelPath = path.join(SCENES_DIR, `${dbScene.id}.glb`);
 
 	try {
-		await fs.access(filePath);
+		await fs.access(modelPath);
 	} catch (err) {
 		throw error(404, 'Scene model not found');
 	}
 
-	const file = Bun.file(filePath);
+	const file = Bun.file(modelPath);
 	return new Response(file, {
 		headers: {
 			'Content-Type': 'model/gltf-binary',
-			'Content-Disposition': `attachment; filename="scene.glb"`
+			'Content-Disposition': `attachment; filename="${dbScene.id}.glb"`
 		}
 	});
 }

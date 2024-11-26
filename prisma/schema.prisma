@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../data/database.sqlite"
+}
+
+model Scene {
+  id          String     @id @default(uuid())
+  name        String
+  description String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now())
+  hash        String
+  meshes      Mesh[]
+  settings    Settings[]
+}
+
+model Mesh {
+  id       String   @id @default(uuid())
+  scene    Scene    @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+  sceneId  String
+  entities Entity[]
+}
+
+model Entity {
+  id         String
+  mesh       Mesh   @relation(fields: [meshId], references: [id], onDelete: Cascade)
+  meshId     String
+  orderIndex Int    @default(0)
+
+  @@id([meshId, id])
+}
+
+model Settings {
+  id             Int     @id @default(1)
+  defaultScene   Scene?  @relation(fields: [defaultSceneId], references: [id])
+  defaultSceneId String?
+}

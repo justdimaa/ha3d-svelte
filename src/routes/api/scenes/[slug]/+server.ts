@@ -1,76 +1,90 @@
 import path from 'path';
 import fs from 'fs/promises';
 import { error } from '@sveltejs/kit';
-import {
-	handleError,
-	saveGLBFile,
-	SceneSchema,
-	updateMetadata,
-	validateGLBFile,
-	type Scene
-} from '$lib/types/api';
-import { DateTime } from 'luxon';
+import { handleError, saveGLBFile, validateGLBFile, type Scene } from '$lib/types/api';
+import type { Prisma } from '@prisma/client';
+import { mapDbSceneToApi } from '$lib/mappers/scene';
 
 const SCENES_DIR = './data/scenes';
 
-export async function GET({ request, params, url }) {
-	const sanitizedId = path.basename(params.slug); // Prevent path traversal
-	const sceneDir = path.join(SCENES_DIR, sanitizedId);
-	const jsonPath = path.join(sceneDir, 'scene.json');
-
+export async function GET({ request, params, locals }) {
 	try {
-		await fs.access(jsonPath);
-	} catch (err) {
-		throw error(404, 'Scene model not found');
-	}
+		const dbScene = await locals.prisma.scene.findUnique({
+			where: { id: params.slug },
+			include: {
+				meshes: {
+					include: {
+						entities: true
+					}
+				}
+			}
+		});
 
-	const sceneData = await fs.readFile(jsonPath, 'utf-8');
-	return new Response(sceneData, {
-		headers: { 'Content-Type': 'application/json' }
-	});
+		if (!dbScene) {
+			throw error(404, 'Scene not found');
+		}
+
+		const apiScene = mapDbSceneToApi(dbScene);
+		return new Response(JSON.stringify(apiScene), {
+			headers: { 'Content-Type': 'application/json' }
+		});
+	} catch (err) {
+		console.error('Error fetching scene:', err);
+		return error(500, 'Internal server error');
+	}
 }
 
-export async function DELETE({ request, params }) {
+export async function DELETE({ request, params, locals }) {
 	try {
-		const sanitizedId = path.basename(params.slug);
-		const sceneDir = path.join(SCENES_DIR, sanitizedId);
+		// Delete from database (cascade will handle related records)
+		const dbScene = await locals.prisma.scene.delete({
+			where: { id: params.slug }
+		});
 
-		// Check if scene exists
-		try {
-			await fs.access(sceneDir);
-		} catch {
+		if (!dbScene) {
 			return error(404, 'Scene not found');
 		}
 
-		// Delete scene directory and all contents
-		await fs.rm(sceneDir, { recursive: true, force: true });
+		// Delete scene files
+		try {
+			const modelPath = path.join(SCENES_DIR, `${dbScene.id}.glb`);
+			await fs.rm(modelPath, { recursive: true, force: true });
+		} catch (fsErr) {
+			console.error('Failed to delete scene files:', fsErr);
+			// Continue since DB deletion succeeded
+		}
 
 		return new Response(null, { status: 204 });
 	} catch (err) {
+		if (err.code === 'P2025') {
+			// Prisma not found error
+			return error(404, 'Scene not found');
+		}
 		console.error('Error deleting scene:', err);
 		return error(500, 'Internal server error');
 	}
 }
 
-export async function PATCH({ request, params }) {
+export async function PATCH({ request, params, locals }) {
 	try {
 		// Get existing scene
-		const sceneId = path.basename(params.slug);
-		const sceneDir = path.join(SCENES_DIR, sceneId);
-		const jsonPath = path.join(sceneDir, 'scene.json');
+		const dbScene = await locals.prisma.scene.findUnique({
+			where: { id: params.slug },
+			include: {
+				meshes: {
+					include: {
+						entities: true
+					}
+				}
+			}
+		});
 
-		// Load and validate existing scene
-		let currentScene: Scene;
-		try {
-			const sceneData = await fs.readFile(jsonPath, 'utf-8');
-			currentScene = SceneSchema.parse(JSON.parse(sceneData));
-		} catch (err) {
-			console.log(err);
-			throw error(404, 'Scene not found');
+		if (!dbScene) {
+			return error(404, 'Scene not found');
 		}
 
-		// Create updated scene from current
-		let updatedScene = { ...currentScene };
+		let metadata: Partial<Scene>;
+		let hash = dbScene.hash;
 
 		if (request.headers.get('content-type')?.includes('multipart/form-data')) {
 			const formData = await request.formData();
@@ -82,8 +96,7 @@ export async function PATCH({ request, params }) {
 				return error(400, 'Missing scene metadata');
 			}
 
-			const metadata = JSON.parse(payloadJson);
-			updateMetadata(metadata, updatedScene);
+			metadata = JSON.parse(payloadJson);
 
 			// Handle file update if provided
 			const file = formData.get('file');
@@ -92,25 +105,52 @@ export async function PATCH({ request, params }) {
 				return error(400, 'Missing or invalid GLB file');
 			}
 
-			if (file instanceof File) {
-				const stream = await validateGLBFile(file);
-				updatedScene.hash = await saveGLBFile(stream, sceneDir);
-			}
+			const modelPath = path.join(SCENES_DIR, `${dbScene.id}.glb`);
+			const stream = await validateGLBFile(file);
+			hash = await saveGLBFile(stream, modelPath);
 		} else {
-			// Handle JSON-only metadata update
-			const updates = await request.json();
-			updateMetadata(updates, updatedScene);
+			metadata = await request.json();
 		}
 
-		// Update scene updated timestamp
-		updatedScene.updatedAt = DateTime.utc().toISO();
+		const updateData: Prisma.SceneUpdateInput = {};
 
-		// Validate final state
-		const validatedScene = SceneSchema.parse(updatedScene);
-		await fs.writeFile(jsonPath, JSON.stringify(validatedScene, null, 2));
+		if ('name' in metadata) {
+			updateData.name = metadata.name;
+		}
+		if ('description' in metadata) {
+			updateData.description = metadata.description;
+		}
+		if (hash !== dbScene.hash) {
+			updateData.hash = hash;
+		}
+		if ('meshes' in metadata) {
+			updateData.meshes = {
+				deleteMany: {},
+				create: Object.entries(metadata.meshes!).map(([id, mesh]) => ({
+					id,
+					entities: {
+						create: mesh.entityIds.map((entityId) => ({
+							id: entityId
+						}))
+					}
+				}))
+			};
+		}
 
-		return new Response(JSON.stringify({ scene: validatedScene }), {
-			status: 200,
+		const updatedScene = await locals.prisma.scene.update({
+			where: { id: dbScene.id },
+			data: updateData,
+			include: {
+				meshes: {
+					include: {
+						entities: true
+					}
+				}
+			}
+		});
+
+		const apiScene = mapDbSceneToApi(updatedScene);
+		return new Response(JSON.stringify({ scene: apiScene }), {
 			headers: { 'Content-Type': 'application/json' }
 		});
 	} catch (err) {

@@ -6,14 +6,14 @@ import { z } from 'zod';
 
 export const MeshSchema = z.object({
 	id: z.string(),
-	entityIds: z.array(z.string())
+	entityIds: z.array(z.string().min(1))
 });
 
 export const MeshesSchema = z.record(z.string(), MeshSchema);
 
 export const SceneSchema = z.object({
 	id: z.string().uuid(),
-	name: z.string(),
+	name: z.string().min(1, 'Name is required'),
 	description: z.string(),
 	createdAt: z.string().datetime(),
 	updatedAt: z.string().datetime(),
@@ -23,14 +23,14 @@ export const SceneSchema = z.object({
 
 export const ScenesSchema = z.record(z.string().uuid(), SceneSchema);
 
-export const ConfigSchema = z.object({
+export const SettingsSchema = z.object({
 	defaultSceneId: z.string().uuid().optional()
 });
 
 export type Mesh = z.infer<typeof MeshSchema>;
 export type Meshes = z.infer<typeof MeshesSchema>;
 export type Scene = z.infer<typeof SceneSchema>;
-export type Config = z.infer<typeof ConfigSchema>;
+export type Settings = z.infer<typeof SettingsSchema>;
 
 export class FileTooLargeError extends Error {
 	constructor() {

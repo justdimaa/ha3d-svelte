@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { entities, homeApi, selectedMesh, tempMeshes } from '../../../stores/global';
+	import { entities, selectedMesh, tempMeshes } from '../../../stores/global';
 	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
 	import { type HassEntity } from 'home-assistant-js-websocket';
 	import { getEntityIcon } from '../../../utils/icons';
 	import { mdiMagnify } from '@mdi/js';
-	import { getConfig, getScene, getScenes, updateConfig, updateScene } from '$lib/ha/api';
+	import { getSettings, updateScene } from '$lib/ha/api';
 
 	// todo: tab shouldnt disappear after selected first entity
 
@@ -30,9 +30,9 @@
 	let filterText = $state('');
 
 	async function onToggleEntity(entity: HassEntity) {
-		const config = await getConfig();
+		const settings = await getSettings();
 
-		let currentSceneId = config.defaultSceneId;
+		let currentSceneId = settings.defaultSceneId;
 
 		const meshData = $tempMeshes[$selectedMesh!] || {
 			id: $selectedMesh!,
@@ -60,7 +60,7 @@
 
 		// Update using new API
 		try {
-			await updateScene(currentSceneId, {
+			await updateScene(currentSceneId!, {
 				meshes: $tempMeshes
 			});
 		} catch (error) {

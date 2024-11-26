@@ -1,13 +1,13 @@
 import { type AuthData } from 'home-assistant-js-websocket';
-import type { Config, Mesh, Scene } from '../types/api';
+import type { Settings, Mesh, Scene } from '../types/api';
 
-export const getConfig = async (): Promise<Config> => {
+export const getSettings = async (): Promise<Settings> => {
 	const accessToken = getAuthToken();
 	if (!accessToken) {
 		throw new Error('No authentication token available');
 	}
 
-	const response = await fetch('/api/config', {
+	const response = await fetch('/api/settings', {
 		headers: {
 			Authorization: `Bearer ${accessToken}`
 		}
@@ -21,19 +21,19 @@ export const getConfig = async (): Promise<Config> => {
 	return data;
 };
 
-export const updateConfig = async (cfg: Partial<Config>): Promise<Config> => {
+export const updateSettings = async (updates: Partial<Settings>): Promise<Settings> => {
 	const accessToken = getAuthToken();
 	if (!accessToken) {
 		throw new Error('No authentication token available');
 	}
 
-	const response = await fetch('/api/config', {
+	const response = await fetch('/api/settings', {
 		method: 'PATCH',
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
 			'Content-Type': 'application/json'
 		},
-		body: JSON.stringify(cfg)
+		body: JSON.stringify(updates)
 	});
 
 	if (!response.ok) {
@@ -50,17 +50,18 @@ export const getScenes = async () => {
 		throw new Error('No authentication token available');
 	}
 
-	const scenes = await fetch('/api/scenes', {
+	const response = await fetch('/api/scenes', {
 		headers: {
 			Authorization: `Bearer ${accessToken}`
 		}
 	});
 
-	if (!scenes.ok) {
-		throw new Error(scenes.statusText);
+	if (!response.ok) {
+		throw new Error(response.statusText);
 	}
 
-	return scenes.json();
+	const data = await response.json();
+	return data.scenes;
 };
 export const getScene = async (sceneId: string): Promise<Scene> => {
 	const accessToken = getAuthToken();
@@ -82,19 +83,19 @@ export const getScene = async (sceneId: string): Promise<Scene> => {
 	return data;
 };
 
-export const createScene = async (data: SceneCreate): Promise<Scene> => {
+export const createScene = async (create: SceneCreate): Promise<Scene> => {
 	const accessToken = getAuthToken();
 	if (!accessToken) {
 		throw new Error('No authentication token available');
 	}
 
 	const formData = new FormData();
-	formData.append('file', data.file);
+	formData.append('file', create.file);
 
 	// Create payload_json with metadata
 	const metadata = {
-		name: data.name || 'New Scene',
-		meshes: data.meshes || {}
+		name: create.name || 'New Scene',
+		meshes: create.meshes || {}
 	};
 	formData.append('payload_json', JSON.stringify(metadata));
 
@@ -110,8 +111,8 @@ export const createScene = async (data: SceneCreate): Promise<Scene> => {
 		throw new Error(`Failed to create scene: ${response.statusText}`);
 	}
 
-	const responseData = await response.json();
-	return responseData.scene;
+	const data = await response.json();
+	return data.scene;
 };
 
 export const updateScene = async (sceneId: string, updates: SceneUpdate): Promise<Scene> => {
