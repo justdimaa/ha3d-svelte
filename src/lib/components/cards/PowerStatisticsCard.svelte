@@ -108,7 +108,7 @@
 		});
 
 		statSeries = Object.entries(stats).map(([id, data]) => ({
-			name: $entities[id].attributes.friendly_name ?? id,
+			name: $entities[id]?.attributes.friendly_name ?? id,
 			data: data.map((d) => d.change.toFixed(2))
 		}));
 
