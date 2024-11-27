@@ -1,6 +1,7 @@
 import {
 	Connection,
 	createConnection,
+	createLongLivedTokenAuth,
 	ERR_HASS_HOST_REQUIRED,
 	getAuth,
 	getUser,
@@ -42,12 +43,23 @@ function saveAuthTokens(data: AuthData | null) {
 export const connect = async () => {
 	let auth;
 
+	// usage: https://your-ha-instance.local/?authToken=long-lived-token
+	const urlParams = new URLSearchParams(window.location.search);
+	const urlAuthToken = urlParams.get('authToken');
+
 	try {
-		// Try to pick up authentication after user logs in
-		auth = await getAuth({
-			loadTokens: loadAuthTokens,
-			saveTokens: saveAuthTokens
-		});
+		if (urlAuthToken) {
+			// override the token with the one from the URL
+			const hassUrl = HA_PUB_URL ?? prompt('What host to connect to?', 'http://localhost:8123');
+			auth = createLongLivedTokenAuth(hassUrl, urlAuthToken);
+			saveAuthTokens(auth.data);
+		} else {
+			// Try to pick up authentication after user logs in
+			auth = await getAuth({
+				loadTokens: loadAuthTokens,
+				saveTokens: saveAuthTokens
+			});
+		}
 	} catch (err) {
 		if (err === ERR_HASS_HOST_REQUIRED) {
 			const hassUrl = HA_PUB_URL ?? prompt('What host to connect to?', 'http://localhost:8123');
