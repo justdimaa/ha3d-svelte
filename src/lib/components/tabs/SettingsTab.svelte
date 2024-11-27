@@ -1,1 +1,1 @@
-<span class="text-2xl font-bold">Settings</span>
+<span class="hidden text-2xl font-bold lg:block">Settings</span>

@@ -72,7 +72,7 @@
 	});
 </script>
 
-<span class="text-2xl font-bold">Logbook</span>
+<span class="hidden text-2xl font-bold lg:block">Logbook</span>
 
 <div class="flex flex-col gap-2 pb-2" bind:this={calendarDiv}>
 	<button

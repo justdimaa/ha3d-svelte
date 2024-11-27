@@ -9,6 +9,10 @@
     @apply overscroll-none select-none lg:select-auto;
 }
 
+body {
+    @apply bg-black
+}
+
 /* width */
 ::-webkit-scrollbar {
     @apply h-2 w-2

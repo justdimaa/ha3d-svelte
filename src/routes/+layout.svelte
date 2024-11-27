@@ -56,20 +56,18 @@
 	};
 
 	$effect(() => {
-		async () => {
-			await updateMeshStorage($entities);
-		};
+		updateMeshStorage($entities);
 	});
 
-	onMount(() => {
-		updateMeshStorage($entities);
+	onMount(async () => {
+		await updateMeshStorage($entities);
 	});
 </script>
 
 <svelte:head></svelte:head>
 
 <main
-	class="to-[#10131C]] h-dvh w-screen bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900 via-slate-900 to-black font-ubuntu text-white"
+	class="h-dvh w-screen bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900 via-slate-900 to-black font-ubuntu text-white"
 >
 	{@render children?.()}
 </main>

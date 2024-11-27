@@ -12,7 +12,7 @@
 	let { selectedEntities }: Props = $props();
 </script>
 
-<span class="text-2xl font-bold">Controls</span>
+<span class="hidden text-2xl font-bold lg:block">Controls</span>
 
 {#each selectedEntities as entity}
 	{#if entity.entity_id.split('.')[0] == 'light'}

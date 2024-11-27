@@ -8,7 +8,7 @@
 	let { selectedEntities }: Props = $props();
 </script>
 
-<span class="text-2xl font-bold">Information</span>
+<span class="hidden text-2xl font-bold lg:block">Information</span>
 
 <span class="text-2xl">Debug</span>
 <div
