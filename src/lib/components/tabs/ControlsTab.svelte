@@ -3,6 +3,7 @@
 	import LightsCard from '../cards/LightsCard.svelte';
 	import SensorCard from '../cards/SensorCard.svelte';
 	import BinarySensorCard from '../cards/BinarySensorCard.svelte';
+	import SwitchCard from '../cards/SwitchCard.svelte';
 
 	interface Props {
 		selectedEntities: HassEntity[];
@@ -20,5 +21,7 @@
 		<SensorCard {entity} />
 	{:else if entity.entity_id.split('.')[0] == 'binary_sensor'}
 		<BinarySensorCard {entity} />
+	{:else if entity.entity_id.split('.')[0] == 'switch'}
+		<SwitchCard {entity} />
 	{/if}
 {/each}
