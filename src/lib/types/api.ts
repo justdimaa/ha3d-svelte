@@ -77,10 +77,10 @@ export async function validateGLBFile(file: File): Promise<ReadableStream<Uint8A
 
 export async function saveGLBFile(
 	stream: ReadableStream<Uint8Array>,
-	sceneDir: string
+	modelPath: string
 ): Promise<string> {
 	const hash = createHash('sha256');
-	const writeStream = createWriteStream(path.join(sceneDir, 'scene.glb'));
+	const writeStream = createWriteStream(modelPath);
 
 	// Process file in chunks while calculating hash
 	await stream.pipeTo(
