@@ -3,6 +3,7 @@ import {
 	createConnection,
 	createLongLivedTokenAuth,
 	ERR_HASS_HOST_REQUIRED,
+	ERR_INVALID_AUTH,
 	getAuth,
 	getUser,
 	subscribeEntities,
@@ -52,13 +53,14 @@ export const connect = async () => {
 			// override the token with the one from the URL
 			const hassUrl = HA_PUB_URL ?? prompt('What host to connect to?', 'http://localhost:8123');
 			auth = createLongLivedTokenAuth(hassUrl, urlAuthToken);
-			saveAuthTokens(auth.data);
 		} else {
+			console.log('urlAuthToken');
 			// Try to pick up authentication after user logs in
 			auth = await getAuth({
 				loadTokens: loadAuthTokens,
 				saveTokens: saveAuthTokens
 			});
+			console.log('sddasdas');
 		}
 	} catch (err) {
 		if (err === ERR_HASS_HOST_REQUIRED) {
@@ -69,13 +71,35 @@ export const connect = async () => {
 				loadTokens: loadAuthTokens,
 				saveTokens: saveAuthTokens
 			});
+		} else if (err === ERR_INVALID_AUTH) {
+			localStorage.removeItem('hassTokens');
+			alert('Invalid auth. Please refresh to try again.');
+			return;
 		} else {
 			alert(`Unknown error: ${err}`);
 			return;
 		}
 	}
 
-	const connection = await createConnection({ auth });
+	let connection;
+
+	try {
+		connection = await createConnection({ auth });
+	} catch (err) {
+		if (err === ERR_INVALID_AUTH) {
+			localStorage.removeItem('hassTokens');
+			alert('Invalid auth. Please refresh to try again.');
+			return;
+		}
+
+		alert(`Connection error: ${err}`);
+		return;
+	}
+
+	if (urlAuthToken) {
+		saveAuthTokens(auth.data);
+	}
+
 	homeApi.set(connection);
 	user.set(await getUser(connection));
 
