@@ -7,8 +7,8 @@
 	let sidePanel: SidePanel;
 </script>
 
-<div class="flex w-full flex-col gap-4 lg:grid lg:grid-cols-3 lg:p-4">
-	<div class="flex w-full lg:col-span-2">
+<div class="flex w-full flex-col gap-4 lg:grid lg:grid-cols-5 lg:p-4 xl:grid-cols-3">
+	<div class="flex w-full lg:col-span-3 xl:col-span-2">
 		<div class="flex w-full gap-2 px-4 pt-4 lg:p-0">
 			<input
 				class="pointer-events-auto h-12 grow rounded-full border border-white/10 bg-cyan-900/10 px-4 shadow outline-none backdrop-blur-2xl"
