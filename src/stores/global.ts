@@ -12,7 +12,6 @@ import {
 	type HassUser
 } from 'home-assistant-js-websocket';
 import { writable, type Writable } from 'svelte/store';
-import { HA_PUB_URL } from '$env/static/public';
 import type { Meshes } from '$lib/types/api';
 
 export const homeApi: Writable<Connection | undefined> = writable(undefined);
@@ -41,7 +40,14 @@ function saveAuthTokens(data: AuthData | null) {
 	localStorage.setItem('hassTokens', JSON.stringify(data));
 }
 
+async function loadConfig() {
+	const response = await fetch('/api/info');
+	return await response.json();
+}
+
 export const connect = async () => {
+	let config = await loadConfig();
+
 	let auth;
 
 	// usage: https://your-ha-instance.local/?authToken=long-lived-token
@@ -51,20 +57,18 @@ export const connect = async () => {
 	try {
 		if (urlAuthToken) {
 			// override the token with the one from the URL
-			const hassUrl = HA_PUB_URL ?? prompt('What host to connect to?', 'http://localhost:8123');
+			const hassUrl = config.url ?? prompt('What host to connect to?', 'http://localhost:8123');
 			auth = createLongLivedTokenAuth(hassUrl, urlAuthToken);
 		} else {
-			console.log('urlAuthToken');
 			// Try to pick up authentication after user logs in
 			auth = await getAuth({
 				loadTokens: loadAuthTokens,
 				saveTokens: saveAuthTokens
 			});
-			console.log('sddasdas');
 		}
 	} catch (err) {
 		if (err === ERR_HASS_HOST_REQUIRED) {
-			const hassUrl = HA_PUB_URL ?? prompt('What host to connect to?', 'http://localhost:8123');
+			const hassUrl = config.url ?? prompt('What host to connect to?', 'http://localhost:8123');
 			// Redirect user to log in on their instance
 			auth = await getAuth({
 				hassUrl,
