@@ -7,12 +7,16 @@
 	import { getSettings, updateScene } from '$lib/ha/api';
 
 	// todo: tab shouldnt disappear after selected first entity
+	const ITEMS_PER_PAGE = 10;
 
 	interface Props {
 		selectedEntities: HassEntity[] | undefined;
 	}
 
 	let { selectedEntities }: Props = $props();
+
+	let filterText = $state('');
+	let currentPage = $state(1);
 
 	let filteredEntities = $derived(
 		Object.entries($entities)
@@ -27,7 +31,21 @@
 			.map(([_, e]) => e)
 	);
 
-	let filterText = $state('');
+	let paginatedEntities = $derived(
+		Object.fromEntries(
+			Object.entries(filteredEntities).slice(
+				(currentPage - 1) * ITEMS_PER_PAGE,
+				currentPage * ITEMS_PER_PAGE
+			)
+		)
+	);
+
+	let totalPages = $derived(Math.ceil(Object.keys(filteredEntities).length / ITEMS_PER_PAGE));
+
+	$effect(() => {
+		filterText; // Watch filterText
+		currentPage = 1; // Reset page when filterText changes
+	});
 
 	async function onToggleEntity(entity: HassEntity) {
 		const settings = await getSettings();
@@ -68,6 +86,10 @@
 			// Could add error handling/rollback here
 		}
 	}
+
+	function changePage(page: number) {
+		currentPage = page;
+	}
 </script>
 
 <span class="text-2xl font-bold">Add entity</span>
@@ -86,7 +108,7 @@
 </div>
 
 <div class="flex flex-col gap-2">
-	{#each Object.entries(filteredEntities) as [_, entity]}
+	{#each Object.entries(paginatedEntities) as [_, entity]}
 		<button
 			class="flex items-center justify-between gap-2 overflow-hidden rounded-xl border border-white/10 bg-white/10 px-4 py-2 shadow hover:bg-white/20 lg:backdrop-blur-2xl"
 			onclick={async () => await onToggleEntity(entity)}
@@ -114,4 +136,28 @@
 			</label>
 		</button>
 	{/each}
+
+	{#if totalPages > 1}
+		<div class="flex items-center justify-between gap-2">
+			<button
+				class="select-none rounded-lg bg-white/10 px-6 py-1 hover:bg-white/20 disabled:opacity-50"
+				disabled={currentPage <= 1}
+				onclick={() => changePage(currentPage - 1)}
+			>
+				{'<'}
+			</button>
+
+			<span class="text-sm text-white/70">
+				Page {currentPage} of {totalPages}
+			</span>
+
+			<button
+				class="select-none rounded-lg bg-white/10 px-6 py-1 hover:bg-white/20 disabled:opacity-50"
+				disabled={currentPage >= totalPages}
+				onclick={() => changePage(currentPage + 1)}
+			>
+				{'>'}
+			</button>
+		</div>
+	{/if}
 </div>
