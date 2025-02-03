@@ -163,7 +163,7 @@
 			</div>
 			<div class="flex w-full flex-col gap-2 overflow-y-auto rounded-xl p-4">
 				{#if currentTab == Tab.Controls}
-					<ControlsPanel {selectedEntities} />
+					<ControlsPanel {selectedEntities} addEvent={onAddEntityClicked} />
 				{:else if currentTab == Tab.Info}
 					<InfoPanel {selectedEntities} />
 				{:else if currentTab == Tab.Logbook}

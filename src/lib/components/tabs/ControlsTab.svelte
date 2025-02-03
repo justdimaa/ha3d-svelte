@@ -6,12 +6,14 @@
 	import SwitchCard from '../cards/SwitchCard.svelte';
 	import FanCard from '../cards/FanCard.svelte';
 	import ButtonCard from '../cards/ButtonCard.svelte';
+	import AddCard from '../cards/AddCard.svelte';
 
 	interface Props {
 		selectedEntities: HassEntity[];
+		addEvent: () => void;
 	}
 
-	let { selectedEntities }: Props = $props();
+	let { selectedEntities, addEvent }: Props = $props();
 </script>
 
 <span class="hidden text-2xl font-bold lg:block">Controls</span>
@@ -31,3 +33,5 @@
 		<ButtonCard {entity} />
 	{/if}
 {/each}
+
+<AddCard {addEvent} />
