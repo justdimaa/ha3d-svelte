@@ -73,11 +73,8 @@
 			colorModes.includes('hs')
 		) {
 			layout.push({
-				component: iro.ui.Wheel
-			});
-			layout.push({
 				component: iro.ui.Slider,
-				options: { sliderType: 'saturation' }
+				options: { sliderType: 'hue' }
 			});
 		}
 
@@ -101,6 +98,19 @@
 			colorModes.includes('rgbww') ||
 			colorModes.includes('rgbw') ||
 			colorModes.includes('rgb') ||
+			colorModes.includes('hs')
+		) {
+			layout.push({
+				component: iro.ui.Slider,
+				options: { sliderType: 'saturation' }
+			});
+		}
+
+		if (
+			colorModes.includes('xy') ||
+			colorModes.includes('rgbww') ||
+			colorModes.includes('rgbw') ||
+			colorModes.includes('rgb') ||
 			colorModes.includes('hs') ||
 			colorModes.includes('color_temp')
 		) {
@@ -113,7 +123,7 @@
 		const config: ColorPickerProps = {
 			color: { h: hs[0], s: hs[1], v },
 			layoutDirection: 'vertical',
-			padding: 4,
+			padding: 0,
 			wheelLightness: false,
 			borderWidth: 1,
 			borderColor: '#ffffff60',
@@ -148,7 +158,13 @@
 	};
 
 	// Lifecycle
-	onMount(initColorPicker);
+	onMount(() => {
+		initColorPicker();
+
+		return () => {
+			colorPicker?.off('input:end', updateLight);
+		};
+	});
 
 	$effect(() => {
 		// Watch for changes in entity attributes
