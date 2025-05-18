@@ -1,32 +1,51 @@
 <script lang="ts">
+	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
+	import { mdiBrightness7, mdiInvertColors, mdiLightSwitch, mdiPalette } from '@mdi/js';
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import { onMount } from 'svelte';
-	import iro from '@jaames/iro';
-	import type { IroColorPicker, ColorPickerProps } from '@jaames/iro/dist/ColorPicker';
 	import { homeApi } from '../../../stores/global';
-	import SvgIcon from '@jamescoyle/svelte-icon';
-	import { mdiLightSwitch } from '@mdi/js';
+	import HueSlider from './sliders/HueSlider.svelte';
+	import SaturationSlider from './sliders/SaturationSlider.svelte';
+	import BrightnessSlider from './sliders/BrightnessSlider.svelte';
 
 	interface Props {
 		entity: HassEntity;
 	}
 
 	let { entity }: Props = $props();
-	let colorPicker: IroColorPicker | undefined = $state(undefined);
-	let pickerDiv: HTMLElement;
-	let currentColor: string | undefined = $state(undefined);
 
-	// Utility functions
-	const haToIroBrightness = (haBrightness: number): number =>
-		Math.round((haBrightness * 100) / 255);
+	// Current state driving the UI and API calls
+	let currentHue = $state(0); // 0-360
+	let saturationPosition = $state(100); // 0-100, represents saturation value
+	let brightnessPosition = $state(50); // 0-255, represents brightness value
 
-	const iroToHaBrightness = (iroBrightness: number): number =>
-		Math.min(Math.round((iroBrightness * 255) / 100), 254);
+	let isColorActive = $derived(
+		entity &&
+			entity.state === 'on' &&
+			(entity.attributes.supported_color_modes?.some(
+				(
+					mode: string // Added type for mode
+				) => ['hs', 'rgb', 'rgbw', 'rgbww', 'xy'].includes(mode)
+			) ??
+				false)
+	);
+	let currentColor = $derived(() =>
+		isColorActive
+			? `hsl(${currentHue}, ${saturationPosition}%, ${haBrightnessToPercent(brightnessPosition) / 2}%)`
+			: undefined
+	);
 
-	// Home Assistant API calls
+	let showBrightnessSlider = $derived(
+		entity &&
+			entity.state === 'on' &&
+			(entity.attributes.supported_color_modes?.includes('brightness') || isColorActive)
+	);
+
 	const toggleLight = async () => {
+		if (!entity || !$homeApi) return;
+
 		const service = entity.state === 'on' ? 'turn_off' : 'turn_on';
-		await $homeApi?.sendMessagePromise({
+		await $homeApi.sendMessagePromise({
 			type: 'call_service',
 			domain: 'light',
 			service,
@@ -35,18 +54,23 @@
 		});
 	};
 
-	const updateLight = async (color: iro.Color) => {
-		const brightness = iroToHaBrightness(color.hsv.v);
-		const service_data =
-			entity.attributes.brightness === brightness
-				? {
-						entity_id: entity.entity_id,
-						hs_color: [color.hsv.h, color.hsv.s]
-					}
-				: {
-						entity_id: entity.entity_id,
-						brightness_pct: color.value
-					};
+	const callLightService = async (params?: { hue?: number; sat?: number; bright?: number }) => {
+		if (!entity || !$homeApi) return;
+
+		const service_data: {
+			entity_id: string;
+			hs_color?: [number, number];
+			brightness?: number;
+			// Potentially other params like color_temp, etc. if supported
+		} = { entity_id: entity.entity_id };
+
+		if (params?.hue && params?.sat) {
+			service_data.hs_color = [params.hue, params.sat];
+		}
+
+		if (params?.bright) {
+			service_data.brightness = params.bright;
+		}
 
 		await $homeApi?.sendMessagePromise({
 			type: 'call_service',
@@ -57,119 +81,41 @@
 		});
 	};
 
-	// Initialize color picker
-	const initColorPicker = () => {
-		const hs = entity.attributes.hs_color ?? [0, 0];
-		const v = haToIroBrightness(entity.attributes.brightness ?? 0);
-		const colorModes: string[] = entity.attributes.supported_color_modes;
+	const haBrightnessToPercent = (b: number | undefined | null): number =>
+		typeof b === 'number' ? Math.round((b * 100) / 255) : 100;
 
-		const layout = [];
-
-		if (
-			colorModes.includes('xy') ||
-			colorModes.includes('rgbww') ||
-			colorModes.includes('rgbw') ||
-			colorModes.includes('rgb') ||
-			colorModes.includes('hs')
-		) {
-			layout.push({
-				component: iro.ui.Slider,
-				options: { sliderType: 'hue' }
-			});
-		}
-
-		if (
-			colorModes.includes('xy') ||
-			colorModes.includes('rgbww') ||
-			colorModes.includes('rgbw') ||
-			colorModes.includes('rgb') ||
-			colorModes.includes('hs') ||
-			colorModes.includes('color_temp') ||
-			colorModes.includes('brightness')
-		) {
-			layout.push({
-				component: iro.ui.Slider,
-				options: { sliderType: 'value' }
-			});
-		}
-
-		if (
-			colorModes.includes('xy') ||
-			colorModes.includes('rgbww') ||
-			colorModes.includes('rgbw') ||
-			colorModes.includes('rgb') ||
-			colorModes.includes('hs')
-		) {
-			layout.push({
-				component: iro.ui.Slider,
-				options: { sliderType: 'saturation' }
-			});
-		}
-
-		if (
-			colorModes.includes('xy') ||
-			colorModes.includes('rgbww') ||
-			colorModes.includes('rgbw') ||
-			colorModes.includes('rgb') ||
-			colorModes.includes('hs') ||
-			colorModes.includes('color_temp')
-		) {
-			layout.push({
-				component: iro.ui.Slider,
-				options: { sliderType: 'kelvin' }
-			});
-		}
-
-		const config: ColorPickerProps = {
-			color: { h: hs[0], s: hs[1], v },
-			layoutDirection: 'vertical',
-			padding: 0,
-			wheelLightness: false,
-			borderWidth: 1,
-			borderColor: '#ffffff60',
-			layout
-		};
-
-		colorPicker = iro.ColorPicker(pickerDiv, config);
-		colorPicker.on('input:end', updateLight);
-		currentColor = v ? colorPicker.color.hexString : undefined;
+	const handleHueSliderDragEnd = () => {
+		callLightService({
+			hue: currentHue,
+			sat: saturationPosition
+		});
 	};
 
-	// Update color picker when entity changes
-	const updateColorPicker = () => {
-		if (!colorPicker || !entity) return;
-
-		const hs = entity.attributes.hs_color ?? [0, 0];
-		const v = haToIroBrightness(entity.attributes.brightness ?? 0);
-
-		console.log(colorPicker.color);
-
-		// Only update if values are different to prevent jitter
-		const pickerColor = colorPicker.color;
-		if (
-			Math.abs(pickerColor.hsv.h - hs[0]) > 4 ||
-			Math.abs(pickerColor.hsv.s - hs[1]) > 4 ||
-			Math.abs(pickerColor.hsv.v - v) > 2
-		) {
-			colorPicker.color.set({ h: hs[0], s: hs[1], v });
-		}
-
-		currentColor = v ? colorPicker.color.hexString : undefined;
+	const handleBrightSliderDragEnd = () => {
+		callLightService({
+			bright: brightnessPosition
+		});
 	};
 
-	// Lifecycle
-	onMount(() => {
-		initColorPicker();
+	const syncStateFromEntity = () => {
+		if (!entity) return;
 
-		return () => {
-			colorPicker?.off('input:end', updateLight);
-		};
-	});
+		const hs = entity.attributes.hs_color ?? [0, 0];
+		const v = entity.attributes.brightness ?? 0;
+
+		const hue = hs[0] ?? 0;
+		const sat = hs[1] ?? 0;
+
+		currentHue = hue;
+		saturationPosition = sat;
+		brightnessPosition = v;
+	};
+
+	onMount(syncStateFromEntity);
 
 	$effect(() => {
-		// Watch for changes in entity attributes
 		if (entity) {
-			updateColorPicker();
+			syncStateFromEntity();
 		}
 	});
 </script>
@@ -182,17 +128,50 @@
 			<SvgIcon type="mdi" path={entity.attributes.icon ?? mdiLightSwitch} size="20" />
 			<span>{entity.attributes.friendly_name ?? entity.entity_id}</span>
 		</div>
-
 		<label class="inline-flex cursor-pointer items-center">
 			<input type="checkbox" checked={entity.state === 'on'} class="peer sr-only" />
 			<div
 				class="peer relative h-6 w-11 rounded-full outline-none after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
-				style:background-color={currentColor ?? 'rgba(255 255 255 / .1)'}
+				style:background-color={currentColor() ?? 'rgba(255 255 255 / .1)'}
 			></div>
 		</label>
 	</button>
-	<div
-		class="drop-shadow {entity.state === 'on' ? '' : 'pointer-events-none hidden'}"
-		bind:this={pickerDiv}
-	></div>
+
+	{#if showBrightnessSlider || isColorActive}
+		<div class="flex w-full flex-col gap-2">
+			{#if showBrightnessSlider}
+				<div class="flex w-full items-center justify-between gap-2">
+					<SvgIcon type="mdi" path={mdiBrightness7} size="24" />
+					<span
+						>{String(Math.round(haBrightnessToPercent(brightnessPosition))).padStart(3, '0')}</span
+					>
+					<BrightnessSlider
+						bind:value={brightnessPosition}
+						hue={currentHue}
+						saturation={saturationPosition}
+						{isColorActive}
+						ondragend={handleBrightSliderDragEnd}
+					/>
+				</div>
+			{/if}
+
+			{#if isColorActive}
+				<div class="flex w-full items-center justify-between gap-2">
+					<SvgIcon type="mdi" path={mdiPalette} size="24" />
+					<span>{String(Math.round(currentHue)).padStart(3, '0')}</span>
+					<HueSlider bind:value={currentHue} ondragend={handleHueSliderDragEnd} />
+				</div>
+				<div class="flex w-full items-center justify-between gap-2">
+					<SvgIcon type="mdi" path={mdiInvertColors} size="24" />
+					<span>{String(Math.round(saturationPosition)).padStart(3, '0')}</span>
+					<SaturationSlider
+						bind:value={saturationPosition}
+						hue={currentHue}
+						brightness={brightnessPosition}
+						ondragend={handleHueSliderDragEnd}
+					/>
+				</div>
+			{/if}
+		</div>
+	{/if}
 </div>
