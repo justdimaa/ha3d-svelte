@@ -1,6 +1,12 @@
 <script lang="ts">
 	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
-	import { mdiBrightness7, mdiInvertColors, mdiLightSwitch, mdiPalette } from '@mdi/js';
+	import {
+		mdiBrightness7,
+		mdiCreation,
+		mdiInvertColors,
+		mdiLightSwitch,
+		mdiPalette
+	} from '@mdi/js';
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import { onMount } from 'svelte';
 	import { homeApi } from '../../../stores/global';
@@ -18,6 +24,7 @@
 	let currentHue = $state(0); // 0-360
 	let saturationPosition = $state(100); // 0-100, represents saturation value
 	let brightnessPosition = $state(50); // 0-255, represents brightness value
+	let selectedEffect = $state<string | undefined>(undefined);
 
 	let isColorActive = $derived(
 		entity &&
@@ -41,6 +48,16 @@
 			(entity.attributes.supported_color_modes?.includes('brightness') || isColorActive)
 	);
 
+	let processedEffectList = $derived(() => {
+		const list = entity?.attributes?.effect_list;
+		if (list && Array.isArray(list)) {
+			const stringList = list as string[];
+			const uniqueEffects = Array.from(new Set(stringList));
+			return uniqueEffects.sort((a, b) => a.localeCompare(b));
+		}
+		return [];
+	});
+
 	const toggleLight = async () => {
 		if (!entity || !$homeApi) return;
 
@@ -54,22 +71,31 @@
 		});
 	};
 
-	const callLightService = async (params?: { hue?: number; sat?: number; bright?: number }) => {
+	const callLightService = async (params?: {
+		hue?: number;
+		sat?: number;
+		bright?: number;
+		effect?: string;
+	}) => {
 		if (!entity || !$homeApi) return;
 
 		const service_data: {
 			entity_id: string;
 			hs_color?: [number, number];
 			brightness?: number;
-			// Potentially other params like color_temp, etc. if supported
+			effect?: string;
 		} = { entity_id: entity.entity_id };
 
-		if (params?.hue && params?.sat) {
+		if (params?.hue !== undefined && params?.sat !== undefined) {
 			service_data.hs_color = [params.hue, params.sat];
 		}
 
-		if (params?.bright) {
+		if (params?.bright !== undefined) {
 			service_data.brightness = params.bright;
+		}
+
+		if (params?.effect) {
+			service_data.effect = params.effect;
 		}
 
 		await $homeApi?.sendMessagePromise({
@@ -97,11 +123,17 @@
 		});
 	};
 
+	const handleEffectChange = () => {
+		if (!entity || !$homeApi || selectedEffect === undefined) return;
+		callLightService({ effect: selectedEffect });
+	};
+
 	const syncStateFromEntity = () => {
 		if (!entity) return;
 
 		const hs = entity.attributes.hs_color ?? [0, 0];
 		const v = entity.attributes.brightness ?? 0;
+		const effect = entity.attributes.effect;
 
 		const hue = hs[0] ?? 0;
 		const sat = hs[1] ?? 0;
@@ -109,6 +141,7 @@
 		currentHue = hue;
 		saturationPosition = sat;
 		brightnessPosition = v;
+		selectedEffect = effect;
 	};
 
 	onMount(syncStateFromEntity);
@@ -181,6 +214,26 @@
 					/>
 				</div>
 			{/if}
+		</div>
+	{/if}
+
+	{#if processedEffectList().length > 0 && entity.state === 'on'}
+		<div class="flex w-full items-center gap-2">
+			<SvgIcon type="mdi" path={mdiCreation} size="20" class="flex-shrink-0" />
+			<select
+				class="h-8 w-full select-none rounded-xl border border-white/10 bg-white/10 px-4 text-sm text-white hover:bg-white/20"
+				bind:value={selectedEffect}
+				onchange={handleEffectChange}
+				title="Select an effect"
+			>
+				{#each processedEffectList() as effectName, i (i)}
+					<option
+						class="bg-white text-black"
+						value={effectName}
+						selected={selectedEffect === effectName}>{effectName}</option
+					>
+				{/each}
+			</select>
 		</div>
 	{/if}
 </div>
