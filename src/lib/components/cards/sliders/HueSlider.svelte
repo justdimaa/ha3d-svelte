@@ -29,7 +29,7 @@
 <style>
 	.custom-hue-slider {
 		width: 100%;
-		height: 32px; /* Overall height to accommodate thumb */
+		height: 1.5rem;
 		background: transparent; /* Essential for custom track styling */
 		cursor: pointer;
 		-webkit-appearance: none; /* Remove default WebKit appearance */
@@ -51,7 +51,7 @@
 	/* --- WebKit (Chrome, Safari, newer Edge, Opera) --- */
 	.custom-hue-slider::-webkit-slider-runnable-track {
 		width: 100%;
-		height: 32px;
+		height: 1.5rem;
 		background: linear-gradient(
 			to right,
 			hsl(0, 100%, 50%),
@@ -69,12 +69,12 @@
 	.custom-hue-slider::-webkit-slider-thumb {
 		-webkit-appearance: none; /* Required to style thumb */
 		appearance: none;
-		width: 24px;
-		height: 24px;
+		width: 1.25rem;
+		height: 1.25rem;
 		background-color: white;
 		border: none;
 		border-radius: 50%;
-		margin-top: 4px; /* Vertically center thumb: (track_height - thumb_height) / 2 */
+		margin-top: 0.125rem; /* (track - thumb) / 2 */
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 		cursor: pointer;
 	}
@@ -82,7 +82,7 @@
 	/* --- Firefox --- */
 	.custom-hue-slider::-moz-range-track {
 		width: 100%;
-		height: 32px;
+		height: 1.5rem;
 		background: linear-gradient(
 			to right,
 			hsl(0, 100%, 50%),
@@ -98,8 +98,8 @@
 	}
 
 	.custom-hue-slider::-moz-range-thumb {
-		width: 24px;
-		height: 24px;
+		width: 1.25rem;
+		height: 1.25rem;
 		background-color: white;
 		border: none;
 		border-radius: 50%;

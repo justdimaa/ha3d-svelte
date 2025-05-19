@@ -138,13 +138,18 @@
 	</button>
 
 	{#if showBrightnessSlider || isColorActive}
-		<div class="flex w-full flex-col gap-2">
+		<div class="flex w-full flex-col gap-3">
 			{#if showBrightnessSlider}
 				<div class="flex w-full items-center justify-between gap-2">
-					<SvgIcon type="mdi" path={mdiBrightness7} size="24" />
-					<span
-						>{String(Math.round(haBrightnessToPercent(brightnessPosition))).padStart(3, '0')}</span
-					>
+					<div class="flex items-center gap-1">
+						<SvgIcon type="mdi" path={mdiBrightness7} size="20" />
+						<span
+							>{String(Math.round(haBrightnessToPercent(brightnessPosition))).padStart(
+								3,
+								'0'
+							)}</span
+						>
+					</div>
 					<BrightnessSlider
 						bind:value={brightnessPosition}
 						hue={currentHue}
@@ -157,13 +162,17 @@
 
 			{#if isColorActive}
 				<div class="flex w-full items-center justify-between gap-2">
-					<SvgIcon type="mdi" path={mdiPalette} size="24" />
-					<span>{String(Math.round(currentHue)).padStart(3, '0')}</span>
+					<div class="flex items-center gap-1">
+						<SvgIcon type="mdi" path={mdiPalette} size="20" />
+						<span>{String(Math.round(currentHue)).padStart(3, '0')}</span>
+					</div>
 					<HueSlider bind:value={currentHue} ondragend={handleHueSliderDragEnd} />
 				</div>
 				<div class="flex w-full items-center justify-between gap-2">
-					<SvgIcon type="mdi" path={mdiInvertColors} size="24" />
-					<span>{String(Math.round(saturationPosition)).padStart(3, '0')}</span>
+					<div class="flex items-center gap-1">
+						<SvgIcon type="mdi" path={mdiInvertColors} size="20" />
+						<span>{String(Math.round(saturationPosition)).padStart(3, '0')}</span>
+					</div>
 					<SaturationSlider
 						bind:value={saturationPosition}
 						hue={currentHue}

@@ -46,7 +46,7 @@
 		-moz-appearance: none;
 		appearance: none;
 		width: 100%;
-		height: 32px; /* Accommodate thumb */
+		height: 1.5rem;
 		background: transparent;
 		cursor: pointer;
 		padding: 0;
@@ -66,7 +66,7 @@
 	/* WebKit (Chrome, Safari, Edge) */
 	.saturation-range-slider::-webkit-slider-runnable-track {
 		width: 100%;
-		height: 32px;
+		height: 1.5rem;
 		background: var(--track-gradient);
 		border-radius: 10px;
 		border: none;
@@ -75,13 +75,13 @@
 	.saturation-range-slider::-webkit-slider-thumb {
 		-webkit-appearance: none;
 		appearance: none;
-		width: 24px;
-		height: 24px;
+		width: 1.25rem;
+		height: 1.25rem;
 		background-color: white;
 		border: none;
 		border-radius: 50%;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-		margin-top: 4px; /* (20px track - 24px thumb) / 2 */
+		margin-top: 0.125rem; /* (track - thumb) / 2 */
 		cursor: pointer;
 	}
 
@@ -93,7 +93,7 @@
 	/* Mozilla Firefox */
 	.saturation-range-slider::-moz-range-track {
 		width: 100%;
-		height: 32px;
+		height: 1.5rem;
 		background: var(--track-gradient);
 		border-radius: 10px;
 		border: none;
@@ -102,8 +102,8 @@
 	.saturation-range-slider::-moz-range-thumb {
 		-moz-appearance: none;
 		appearance: none;
-		width: 24px;
-		height: 24px;
+		width: 1.25rem;
+		height: 1.25rem;
 		background-color: white;
 		border: none;
 		border-radius: 50%;
