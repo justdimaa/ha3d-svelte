@@ -10,9 +10,7 @@
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import { onMount } from 'svelte';
 	import { homeApi } from '../../../stores/global';
-	import HueSlider from './sliders/HueSlider.svelte';
-	import SaturationSlider from './sliders/SaturationSlider.svelte';
-	import BrightnessSlider from './sliders/BrightnessSlider.svelte';
+	import GradientSlider from './sliders/GradientSlider.svelte';
 
 	interface Props {
 		entity: HassEntity;
@@ -183,12 +181,13 @@
 							)}</span
 						>
 					</div>
-					<BrightnessSlider
+					<GradientSlider
 						bind:value={brightnessPosition}
-						hue={currentHue}
-						saturation={saturationPosition}
-						{isColorActive}
 						ondragend={handleBrightSliderDragEnd}
+						min={2}
+						max={255}
+						step={0.01}
+						gradient={`linear-gradient(to right, hsl(${currentHue}, 0%, 0%), hsl(${currentHue}, ${saturationPosition}%, 50%))`}
 					/>
 				</div>
 			{/if}
@@ -199,18 +198,27 @@
 						<SvgIcon type="mdi" path={mdiPalette} size="20" />
 						<span>{String(Math.round(currentHue)).padStart(3, '0')}</span>
 					</div>
-					<HueSlider bind:value={currentHue} ondragend={handleHueSliderDragEnd} />
+					<GradientSlider
+						bind:value={currentHue}
+						ondragend={handleHueSliderDragEnd}
+						min={0}
+						max={359}
+						step={0.01}
+						gradient={'linear-gradient(to right, hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%), hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(360, 100%, 50%))'}
+					/>
 				</div>
 				<div class="flex w-full items-center justify-between gap-2">
 					<div class="flex items-center gap-1">
 						<SvgIcon type="mdi" path={mdiInvertColors} size="20" />
 						<span>{String(Math.round(saturationPosition)).padStart(3, '0')}</span>
 					</div>
-					<SaturationSlider
+					<GradientSlider
 						bind:value={saturationPosition}
-						hue={currentHue}
-						brightness={brightnessPosition}
 						ondragend={handleHueSliderDragEnd}
+						min={0}
+						max={100}
+						step={0.01}
+						gradient={`linear-gradient(to right, hsl(${currentHue}, 0%, ${brightnessPosition}%), hsl(${currentHue}, 100%, ${haBrightnessToPercent(brightnessPosition) / 2}%))`}
 					/>
 				</div>
 			{/if}
