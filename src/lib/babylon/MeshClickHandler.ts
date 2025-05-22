@@ -1,72 +1,68 @@
-import * as BABYLON from "@babylonjs/core";
-import { selectedMesh } from "../../stores/global";
+import * as BABYLON from '@babylonjs/core';
+import { selectedMesh } from '../../stores/global';
 
 interface Selected {
-    mesh: BABYLON.AbstractMesh;
-    material: BABYLON.Material | null;
+	mesh: BABYLON.AbstractMesh;
+	material: BABYLON.Material | null;
 }
 
 export class MeshClickHandler {
-    engine: BABYLON.Engine;
-    scene: BABYLON.Scene;
+	selectedMaterial!: BABYLON.Material;
+	selected: Selected | undefined;
 
-    selectedMaterial: BABYLON.Material;
-    selected: Selected | undefined;
+	constructor(
+		private engine: BABYLON.Engine,
+		private scene: BABYLON.Scene
+	) {
+		this.initMaterial();
+		this.initEvents();
+	}
 
-    constructor(engine: BABYLON.Engine, scene: BABYLON.Scene) {
-        this.engine = engine;
-        this.scene = scene;
+	private initMaterial() {
+		const mat = new BABYLON.StandardMaterial('selected', this.scene);
+		mat.diffuseColor = new BABYLON.Color3(1, 0.6, 0.6);
+		mat.emissiveColor = new BABYLON.Color3(0.2, 0, 0);
+		mat.specularColor = new BABYLON.Color3(0, 0, 0);
+		this.selectedMaterial = mat;
+	}
 
-        this.initMaterial();
-        this.initEvents();
-    }
+	private initEvents() {
+		let delta = [0, 0];
 
-    private initMaterial() {
-        const mat = new BABYLON.StandardMaterial('selected', this.scene);
-        mat.diffuseColor = new BABYLON.Color3(1, .6, .6);
-        mat.emissiveColor = new BABYLON.Color3(0.2, 0, 0);
-        mat.specularColor = new BABYLON.Color3(0, 0, 0)
-        this.selectedMaterial = mat;
-    }
+		this.scene.onPointerDown = (evt, _) => {
+			delta = [evt.x, evt.y];
+		};
 
-    private initEvents() {
-        let delta = [0, 0];
+		this.scene.onPointerUp = (evt, pickResult) => {
+			if (!pickResult) return;
+			if (evt.x != delta[0] || evt.y != delta[1]) return;
+			this.onMeshSelect(pickResult.pickedMesh);
+		};
+	}
 
-        this.scene.onPointerDown = (evt, _) => {
-            delta = [evt.x, evt.y];
-        };
+	private onMeshSelect(mesh: BABYLON.AbstractMesh | null) {
+		if (!mesh) {
+			if (!this.selected) return;
 
-        this.scene.onPointerUp = (evt, pickResult) => {
-            if (!pickResult) return;
-            if (evt.x != delta[0] || evt.y != delta[1]) return;
-            this.onMeshSelect(pickResult.pickedMesh);
-        };
+			this.selected.mesh.material = this.selected.material;
+			this.selected = undefined;
+			selectedMesh.set(undefined);
+			return;
+		}
 
-    }
+		if (this.selected) {
+			if (this.selected.mesh == mesh) return;
+			this.selected.mesh.material = this.selected.material;
+		}
 
-    private onMeshSelect(mesh: BABYLON.AbstractMesh | null) {
-        if (!mesh) {
-            if (!this.selected) return;
+		console.debug('selected mesh ' + mesh.name);
 
-            this.selected.mesh.material = this.selected.material;
-            this.selected = undefined;
-            selectedMesh.set(undefined);
-            return;
-        };
+		this.selected = {
+			mesh: mesh,
+			material: mesh.material
+		};
+		mesh.material = this.selectedMaterial;
 
-        if (this.selected) {
-            if (this.selected.mesh == mesh) return;
-            this.selected.mesh.material = this.selected.material;
-        }
-
-        console.debug('selected mesh ' + mesh.name);
-
-        this.selected = {
-            mesh: mesh,
-            material: mesh.material
-        };
-        mesh.material = this.selectedMaterial;
-
-        selectedMesh.set(mesh.name);
-    }
+		selectedMesh.set(mesh.name);
+	}
 }

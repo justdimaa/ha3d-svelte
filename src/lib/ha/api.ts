@@ -83,6 +83,25 @@ export const getScene = async (sceneId: string): Promise<Scene> => {
 	return data;
 };
 
+export const getSceneModel = async (sceneId: string): Promise<Blob> => {
+	const accessToken = getAuthToken();
+	if (!accessToken) {
+		throw new Error('No authentication token available');
+	}
+
+	const response = await fetch(`/api/scenes/${sceneId}/model`, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`
+		}
+	});
+
+	if (!response.ok) {
+		throw new Error(`Failed to fetch scene model: ${response.statusText}`);
+	}
+
+	return response.blob();
+};
+
 export const createScene = async (create: SceneCreate): Promise<Scene> => {
 	const accessToken = getAuthToken();
 	if (!accessToken) {

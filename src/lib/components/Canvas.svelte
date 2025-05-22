@@ -7,6 +7,7 @@
 
 	onMount(() => {
 		sceneManager = new SceneManager(canvas);
+		sceneManager.loadModel('85be3c9d-846d-4e2e-a37e-057aa7f6007b');
 	});
 
 	onDestroy(() => {

@@ -38,8 +38,8 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@babylonjs/core": "^7.54.3",
-		"@babylonjs/loaders": "^7.54.3",
+		"@babylonjs/core": "^8.9.0",
+		"@babylonjs/loaders": "^8.9.0",
 		"@jamescoyle/svelte-icon": "^0.1.1",
 		"@mdi/js": "^7.4.47",
 		"@prisma/client": "^6.5.0",
