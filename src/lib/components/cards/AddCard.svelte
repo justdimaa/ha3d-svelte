@@ -10,7 +10,7 @@
 </script>
 
 <button
-	class="flex justify-center gap-2 rounded-xl border border-cyan-300/50 bg-white/5 p-4 shadow hover:bg-white/20 lg:backdrop-blur-2xl"
+	class="flex justify-center gap-2 rounded-xl border border-dashed border-white/20 bg-white/10 p-4 shadow hover:bg-white/20 lg:backdrop-blur-2xl"
 	onclick={() => {
 		addEvent();
 	}}
