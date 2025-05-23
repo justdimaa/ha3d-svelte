@@ -15,8 +15,8 @@
 	disabled
 >
 	<div class="flex items-center gap-2">
-		<SvgIcon type="mdi" path={getEntityIcon(entity)} size="24" />
-		<span>{entity.attributes.friendly_name ?? entity.entity_id}</span>
+		<SvgIcon class="flex-shrink-0" type="mdi" path={getEntityIcon(entity)} size="20" />
+		<span class="text-left">{entity.attributes.friendly_name ?? entity.entity_id}</span>
 	</div>
 	<div class="flex gap-1">
 		<!-- {entity.attributes.device_class} -->

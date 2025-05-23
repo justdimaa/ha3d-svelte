@@ -10,7 +10,8 @@
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import { onMount } from 'svelte';
 	import { homeApi } from '../../../stores/global';
-	import GradientSlider from './sliders/GradientSlider.svelte';
+	import GradientSlider from '../controls/GradientSlider.svelte';
+	import Switch from '../controls/Switch.svelte';
 
 	interface Props {
 		entity: HassEntity;
@@ -154,18 +155,17 @@
 <div
 	class="flex flex-col items-center justify-center gap-4 rounded-xl border border-white/10 bg-white/10 p-4 shadow lg:backdrop-blur-2xl"
 >
-	<button class="flex w-full justify-between gap-2 rounded-xl" onclick={toggleLight}>
+	<button class="flex w-full justify-between gap-2" onclick={toggleLight}>
 		<div class="flex items-center gap-1">
-			<SvgIcon type="mdi" path={entity.attributes.icon ?? mdiLightSwitch} size="20" />
+			<SvgIcon
+				class="flex-shrink-0"
+				type="mdi"
+				path={entity.attributes.icon ?? mdiLightSwitch}
+				size="20"
+			/>
 			<span>{entity.attributes.friendly_name ?? entity.entity_id}</span>
 		</div>
-		<label class="inline-flex cursor-pointer items-center">
-			<input type="checkbox" checked={entity.state === 'on'} class="peer sr-only" />
-			<div
-				class="peer relative h-6 w-11 rounded-full outline-none after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
-				style:background-color={currentColor() ?? 'rgba(255 255 255 / .1)'}
-			></div>
-		</label>
+		<Switch checked={entity.state === 'on'} backgroundColor={currentColor()} />
 	</button>
 
 	{#if showBrightnessSlider || isColorActive}

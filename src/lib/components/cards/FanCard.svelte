@@ -4,7 +4,8 @@
 	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
 	import { getEntityIcon } from '../../../utils/icons';
 	import { onMount } from 'svelte';
-	import GradientSlider from './sliders/GradientSlider.svelte';
+	import GradientSlider from '../controls/GradientSlider.svelte';
+	import Switch from '../controls/Switch.svelte';
 
 	interface Props {
 		entity: HassEntity;
@@ -59,17 +60,12 @@
 	class="flex flex-col justify-between gap-4 rounded-xl border border-white/10 bg-white/10 p-4 shadow lg:backdrop-blur-2xl"
 >
 	<!-- Header with name and power -->
-	<button class="flex items-start justify-between" onclick={togglePower}>
+	<button class="flex w-full justify-between gap-2" onclick={togglePower}>
 		<div class="flex items-center gap-2">
-			<SvgIcon type="mdi" path={getEntityIcon(entity)} size="24" />
+			<SvgIcon class="flex-shrink-0" type="mdi" path={getEntityIcon(entity)} size="20" />
 			<span>{entity.attributes.friendly_name ?? entity.entity_id}</span>
 		</div>
-		<label class="pointer-events-none inline-flex cursor-pointer items-center">
-			<input type="checkbox" checked={entity.state === 'on'} class="peer sr-only" />
-			<div
-				class="peer relative h-6 w-11 rounded-full bg-white/10 outline-none after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-neutral-500 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
-			></div>
-		</label>
+		<Switch checked={entity.state === 'on'} />
 	</button>
 
 	{#if entity.state === 'on' && entity.attributes.percentage_step}
