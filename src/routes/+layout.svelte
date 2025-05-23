@@ -68,7 +68,7 @@
 <svelte:head></svelte:head>
 
 <main
-	class="h-dvh w-screen bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900 via-slate-900 to-black font-ubuntu text-white"
+	class="h-dvh w-screen bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-800 via-cyan-900/50 to-black font-ubuntu text-white"
 >
 	{@render children?.()}
 </main>

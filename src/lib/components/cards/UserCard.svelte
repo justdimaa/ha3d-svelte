@@ -34,13 +34,13 @@
 <div class="flex justify-between">
 	<div class="flex flex-col justify-between">
 		<span class="font-bold">Hi, {name}!</span>
-		<span class="text-neutral-400">{timeDisplay}</span>
+		<span>{timeDisplay}</span>
 	</div>
 	{#if pfpUrl}
 		<img class="aspect-square h-12 rounded-full object-cover shadow" src={pfpUrl} alt="pfp" />
 	{:else}
 		<div
-			class="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 text-3xl shadow"
+			class="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-500 text-3xl shadow"
 		>
 			{name[0].toLocaleUpperCase()}
 		</div>

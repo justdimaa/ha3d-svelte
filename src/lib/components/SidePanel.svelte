@@ -115,7 +115,7 @@
 {#if $user}
 	<div
 		use:setupResizeObserver
-		class="pointer-events-auto absolute bottom-0 left-0 right-0 overflow-y-auto overflow-x-hidden rounded-t-xl border border-white/10 bg-cyan-900/30 backdrop-blur-2xl lg:relative lg:col-span-2 lg:flex lg:!h-full lg:flex-col lg:rounded-xl lg:!rounded-t-xl lg:!border lg:backdrop-blur xl:col-span-1"
+		class="pointer-events-auto absolute bottom-0 left-0 right-0 overflow-y-auto overflow-x-hidden rounded-t-xl border border-white/10 bg-cyan-700/30 backdrop-blur-2xl lg:relative lg:col-span-2 lg:flex lg:!h-full lg:flex-col lg:rounded-xl lg:!rounded-t-xl lg:!border lg:backdrop-blur xl:col-span-1"
 		class:border-0={!isPanelHidden}
 		class:!rounded-none={!isPanelHidden}
 		style="height: {$height}%;"

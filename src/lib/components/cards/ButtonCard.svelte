@@ -23,7 +23,7 @@
 </script>
 
 <button
-	class="flex justify-between gap-2 rounded-xl border border-cyan-300/50 bg-white/5 p-4 shadow hover:bg-white/20 lg:backdrop-blur-2xl"
+	class="flex justify-between gap-2 rounded-xl border border-white/10 bg-white/5 p-4 shadow hover:bg-white/20 lg:backdrop-blur-2xl"
 	onclick={callService}
 >
 	<div class="flex items-center gap-2">
