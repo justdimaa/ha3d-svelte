@@ -155,7 +155,7 @@
 <div
 	class="flex flex-col items-center justify-center gap-4 rounded-xl border border-white/10 bg-white/10 p-4 shadow lg:backdrop-blur-2xl"
 >
-	<button class="flex w-full justify-between gap-2" onclick={toggleLight}>
+	<button class="flex w-full items-center justify-between gap-2" onclick={toggleLight}>
 		<div class="flex items-center gap-1">
 			<SvgIcon
 				class="flex-shrink-0"

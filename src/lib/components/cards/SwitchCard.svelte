@@ -27,7 +27,7 @@
 </script>
 
 <button
-	class="flex justify-between gap-2 rounded-xl border border-white/10 bg-white/10 p-4 shadow lg:backdrop-blur-2xl"
+	class="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/10 p-4 shadow lg:backdrop-blur-2xl"
 	class:opacity-40={!isAvailable}
 	onclick={onToggle}
 	disabled={!isAvailable}

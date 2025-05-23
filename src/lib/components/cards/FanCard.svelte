@@ -60,7 +60,7 @@
 	class="flex flex-col justify-between gap-4 rounded-xl border border-white/10 bg-white/10 p-4 shadow lg:backdrop-blur-2xl"
 >
 	<!-- Header with name and power -->
-	<button class="flex w-full justify-between gap-2" onclick={togglePower}>
+	<button class="flex w-full items-center justify-between gap-2" onclick={togglePower}>
 		<div class="flex items-center gap-2">
 			<SvgIcon class="flex-shrink-0" type="mdi" path={getEntityIcon(entity)} size="20" />
 			<span>{entity.attributes.friendly_name ?? entity.entity_id}</span>
