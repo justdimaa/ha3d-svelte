@@ -44,12 +44,11 @@
 
 	let selectedEntities = $derived(selected?.entityIds.map((i) => $entities[i]));
 
-	let _currentTab = $state(Tab.Controls);
-	let currentTab = $derived(selectedEntities ? _currentTab : Tab.AddEntity);
+	let currentTab = $state(Tab.Controls);
 
 	$effect(() => {
 		if (selected) return;
-		_currentTab = Tab.Controls;
+		currentTab = Tab.Controls;
 	});
 
 	let tabData: TabData[] = [
@@ -81,7 +80,7 @@
 	];
 
 	export function onAddEntityClicked() {
-		_currentTab = Tab.AddEntity;
+		currentTab = Tab.AddEntity;
 	}
 
 	let snapPointsPercent = [30, 100]; // Points where menu can snap to
@@ -95,7 +94,7 @@
 		damping: 0.8
 	});
 
-	function setupResizeObserver(node) {
+	function setupResizeObserver(node: HTMLElement) {
 		if (typeof ResizeObserver === 'undefined') return;
 
 		const resizeObserver = new ResizeObserver((entries) => {
@@ -148,13 +147,13 @@
 			>
 				{#each tabData.filter((d) => !d.hidden) as tab}
 					<button
-						class="flex h-12 grow items-center justify-center rounded-xl hover:bg-white/10 disabled:bg-transparent disabled:text-white/20 lg:backdrop-blur-2xl {_currentTab ==
+						class="flex h-12 grow items-center justify-center rounded-xl hover:bg-white/10 disabled:bg-transparent disabled:text-white/20 lg:backdrop-blur-2xl {currentTab ===
 						tab.type
 							? 'bg-white/10'
 							: ''}"
 						disabled={selectedEntities == undefined}
 						onclick={() => {
-							_currentTab = tab.type;
+							currentTab = tab.type;
 						}}
 					>
 						<SvgIcon type="mdi" path={tab.icon} size="24"></SvgIcon>
@@ -162,15 +161,15 @@
 				{/each}
 			</div>
 			<div class="flex w-full flex-col gap-2 overflow-y-auto rounded-xl p-4">
-				{#if currentTab == Tab.Controls}
+				{#if currentTab === Tab.Controls && selectedEntities}
 					<ControlsPanel {selectedEntities} addEvent={onAddEntityClicked} />
-				{:else if currentTab == Tab.Info}
+				{:else if currentTab === Tab.Info && selectedEntities}
 					<InfoPanel {selectedEntities} />
-				{:else if currentTab == Tab.Logbook}
+				{:else if currentTab === Tab.Logbook && selectedEntities}
 					<LogbookPanel {selectedEntities} />
-				{:else if currentTab == Tab.Settings}
+				{:else if currentTab === Tab.Settings}
 					<SettingsPanel />
-				{:else if currentTab == Tab.AddEntity}
+				{:else}
 					<AddTab {selectedEntities} />
 				{/if}
 			</div>
