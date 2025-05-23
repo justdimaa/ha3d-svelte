@@ -1,4 +1,4 @@
-import { error } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
 import * as fs from 'fs/promises';
 import path from 'path';
 import {
@@ -6,9 +6,7 @@ import {
 	InvalidGLBError,
 	saveGLBFile,
 	SceneSchema,
-	updateMetadata,
-	validateGLBFile,
-	type Scene
+	validateGLBFile
 } from '$lib/types/api';
 import { randomUUID } from 'crypto';
 import { existsSync, mkdir } from 'fs';
@@ -19,10 +17,12 @@ const SCENES_DIR = './data/scenes';
 
 // Ensure directories exist
 if (!existsSync(SCENES_DIR)) {
-	mkdir(SCENES_DIR, { recursive: true });
+	mkdir(SCENES_DIR, { recursive: true }, (err) => {
+		if (err) throw err;
+	});
 }
 
-export async function GET({ request, locals }) {
+export async function GET({ locals }) {
 	try {
 		const dbScenes = await locals.prisma.scene.findMany({
 			include: {
@@ -35,9 +35,7 @@ export async function GET({ request, locals }) {
 		});
 
 		const apiScenes = dbScenes.map(mapDbSceneToApi);
-		return new Response(JSON.stringify({ scenes: apiScenes }), {
-			headers: { 'Content-Type': 'application/json' }
-		});
+		return json({ scenes: apiScenes });
 	} catch (err) {
 		console.error('Error fetching scenes:', err);
 		throw error(500, 'Failed to fetch scenes');
@@ -107,13 +105,15 @@ export async function POST({ request, locals }) {
 		});
 
 		const apiScene = mapDbSceneToApi(dbScene);
-		return new Response(JSON.stringify({ scene: apiScene }), {
-			status: 201,
-			headers: {
-				'Content-Type': 'application/json',
-				Location: `/scenes/${sceneId}`
+		return json(
+			{ scene: apiScene },
+			{
+				status: 201,
+				headers: {
+					Location: `/scenes/${sceneId}`
+				}
 			}
-		});
+		);
 	} catch (err) {
 		if (modelPath) {
 			await fs

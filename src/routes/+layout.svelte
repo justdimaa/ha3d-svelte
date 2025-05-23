@@ -3,7 +3,8 @@
 	import '../app.css';
 	import { entities, tempMeshes } from '../stores/global';
 	import { onMount, type Snippet } from 'svelte';
-	import { getSettings, getScene, getScenes, updateScene } from '$lib/ha/api';
+	import { SceneService } from '$lib/ha/api/sceneService';
+	import { SettingsService } from '$lib/ha/api/settingsService';
 
 	interface Props {
 		children?: Snippet;
@@ -18,12 +19,12 @@
 
 		try {
 			let isDirty = false;
-			const settings = await getSettings();
+			const settings = await SettingsService.get();
 
 			let sceneId = settings.defaultSceneId;
 			if (!sceneId) return;
 
-			let scene = await getScene(sceneId!);
+			let scene = await SceneService.getById(sceneId!);
 			if (!scene) return;
 
 			for (const [meshId, mesh] of Object.entries(scene.meshes)) {
@@ -46,7 +47,7 @@
 			}
 
 			if (isDirty) {
-				scene = await updateScene(scene.id, { meshes: scene.meshes });
+				scene = await SceneService.update(scene.id, { meshes: scene.meshes });
 			}
 
 			$tempMeshes = scene.meshes;

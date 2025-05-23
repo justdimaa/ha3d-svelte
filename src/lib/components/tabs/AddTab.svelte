@@ -4,7 +4,8 @@
 	import { type HassEntity } from 'home-assistant-js-websocket';
 	import { getEntityIcon } from '../../../utils/icons';
 	import { mdiMagnify } from '@mdi/js';
-	import { getSettings, updateScene } from '$lib/ha/api';
+	import { SettingsService } from '$lib/ha/api/settingsService';
+	import { SceneService } from '$lib/ha/api/sceneService';
 
 	// todo: tab shouldnt disappear after selected first entity
 	const ITEMS_PER_PAGE = 10;
@@ -48,7 +49,7 @@
 	});
 
 	async function onToggleEntity(entity: HassEntity) {
-		const settings = await getSettings();
+		const settings = await SettingsService.get();
 
 		let currentSceneId = settings.defaultSceneId;
 
@@ -78,7 +79,7 @@
 
 		// Update using new API
 		try {
-			await updateScene(currentSceneId!, {
+			await SceneService.update(currentSceneId!, {
 				meshes: $tempMeshes
 			});
 		} catch (error) {

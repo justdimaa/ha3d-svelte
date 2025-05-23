@@ -1,13 +1,13 @@
 import path from 'path';
 import fs from 'fs/promises';
-import { error } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
 import { handleError, saveGLBFile, validateGLBFile, type Scene } from '$lib/types/api';
 import type { Prisma } from '@prisma/client';
 import { mapDbSceneToApi } from '$lib/mappers/scene';
 
 const SCENES_DIR = './data/scenes';
 
-export async function GET({ request, params, locals }) {
+export async function GET({ params, locals }) {
 	try {
 		const dbScene = await locals.prisma.scene.findUnique({
 			where: { id: params.slug },
@@ -25,16 +25,14 @@ export async function GET({ request, params, locals }) {
 		}
 
 		const apiScene = mapDbSceneToApi(dbScene);
-		return new Response(JSON.stringify(apiScene), {
-			headers: { 'Content-Type': 'application/json' }
-		});
+		return json(apiScene);
 	} catch (err) {
 		console.error('Error fetching scene:', err);
 		return error(500, 'Internal server error');
 	}
 }
 
-export async function DELETE({ request, params, locals }) {
+export async function DELETE({ params, locals }) {
 	try {
 		// Delete from database (cascade will handle related records)
 		const dbScene = await locals.prisma.scene.delete({
@@ -150,9 +148,7 @@ export async function PATCH({ request, params, locals }) {
 		});
 
 		const apiScene = mapDbSceneToApi(updatedScene);
-		return new Response(JSON.stringify({ scene: apiScene }), {
-			headers: { 'Content-Type': 'application/json' }
-		});
+		return json({ scene: apiScene });
 	} catch (err) {
 		return handleError(err);
 	}

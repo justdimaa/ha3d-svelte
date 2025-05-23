@@ -1,6 +1,9 @@
 import * as BABYLON from '@babylonjs/core';
-import { getScene, getSceneModel } from '$lib/ha/api';
 import { SceneCache } from './SceneCache';
+import { tempMeshes } from '../../stores/global';
+import { get } from 'svelte/store';
+import type { Meshes } from '$lib/types/api';
+import { SceneService } from '$lib/ha/api/sceneService';
 
 export class ModelLoader {
 	private cache: SceneCache;
@@ -10,7 +13,7 @@ export class ModelLoader {
 	}
 
 	public async load(sceneId: string, scene: BABYLON.Scene): Promise<void> {
-		const sceneData = await getScene(sceneId);
+		const sceneData = await SceneService.getById(sceneId);
 		const modelBlob = await this.getModelBlob(sceneData);
 		await this.importModelToScene(modelBlob, scene);
 		this.hideWalls(scene);
@@ -29,7 +32,7 @@ export class ModelLoader {
 		// 	return cached.model;
 		// }
 
-		const modelBlob = await getSceneModel(sceneData.id);
+		const modelBlob = await SceneService.getModel(sceneData.id);
 		await this.cache.cacheModel(sceneData.id, modelBlob, sceneData.hash).catch((err) => {
 			console.warn('Failed to store in cache:', err);
 		});

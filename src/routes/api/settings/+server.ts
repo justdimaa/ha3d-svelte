@@ -1,15 +1,8 @@
 import { error, json } from '@sveltejs/kit';
 import { z } from 'zod';
 import { SettingsSchema } from '../../../lib/types/api';
-import { checkAuth } from '../helpers';
 
-export async function GET({ request, locals }) {
-	// const authToken = request.headers.get('authorization');
-	// if (!authToken) return error(401, 'Authorization header is required');
-
-	// const isAuthorized = await checkAuth(authToken);
-	// if (!isAuthorized) return error(401, 'Invalid authentication token');
-
+export async function GET({ locals }) {
 	try {
 		let settings = await locals.prisma.settings.findFirst();
 

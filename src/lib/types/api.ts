@@ -1,7 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { createHash } from 'crypto';
 import { createWriteStream } from 'fs';
-import path from 'path';
 import { z } from 'zod';
 
 export const MeshSchema = z.object({
