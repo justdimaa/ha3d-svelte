@@ -1,5 +1,6 @@
 import * as BABYLON from '@babylonjs/core';
 import { SceneCache } from './SceneCache';
+import type { DotIndicatorManager } from './DotIndicatorManager';
 import { tempMeshes } from '../../stores/global';
 import { get } from 'svelte/store';
 import type { Meshes } from '$lib/types/api';
@@ -7,9 +8,11 @@ import { SceneService } from '$lib/ha/api/sceneService';
 
 export class ModelLoader {
 	private cache: SceneCache;
+	private dotIndicatorManager: DotIndicatorManager;
 
-	constructor() {
+	constructor(dotIndicatorManager: DotIndicatorManager) {
 		this.cache = new SceneCache();
+		this.dotIndicatorManager = dotIndicatorManager;
 	}
 
 	public async load(sceneId: string, scene: BABYLON.Scene): Promise<void> {
@@ -46,6 +49,11 @@ export class ModelLoader {
 		await BABYLON.AppendSceneAsync(bufferView, scene, {
 			pluginExtension: '.glb'
 		});
+
+		// After the model is loaded, create dot indicators for interactable meshes
+		const loadedMeshes = scene.meshes;
+		const currentTempMeshes = get(tempMeshes);
+		this.dotIndicatorManager.createIndicators(loadedMeshes, currentTempMeshes as Meshes);
 	}
 
 	private hideWalls(scene: BABYLON.Scene): void {

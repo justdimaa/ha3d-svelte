@@ -6,6 +6,7 @@ import { LightingSystem } from './LightingSystem';
 import { GridRenderer } from './GridRenderer';
 import { PostProcessor } from './PostProcessor';
 import { ModelLoader } from './ModelLoader';
+import { DotIndicatorManager } from './DotIndicatorManager';
 
 export class SceneManager {
 	engine!: BABYLON.Engine;
@@ -17,6 +18,7 @@ export class SceneManager {
 	postProcessor!: PostProcessor;
 	modelLoader!: ModelLoader;
 	meshClickHandler!: MeshClickHandler;
+	dotIndicatorManager!: DotIndicatorManager;
 
 	constructor(private canvas: HTMLCanvasElement) {
 		this.setupEngine();
@@ -40,7 +42,8 @@ export class SceneManager {
 	}
 
 	private initializeSystems(): void {
-		this.modelLoader = new ModelLoader();
+		this.dotIndicatorManager = new DotIndicatorManager(this.scene);
+		this.modelLoader = new ModelLoader(this.dotIndicatorManager);
 		this.lightingSystem = new LightingSystem(this.scene);
 		this.gridRenderer = new GridRenderer(this.scene);
 		this.cameraController = new CameraController(this.scene, this.engine);

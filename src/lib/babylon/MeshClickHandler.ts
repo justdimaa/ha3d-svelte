@@ -36,7 +36,48 @@ export class MeshClickHandler {
 		this.scene.onPointerUp = (evt, pickResult) => {
 			if (!pickResult) return;
 			if (evt.x != delta[0] || evt.y != delta[1]) return;
+
+			// Get all meshes at this click position, sorted by distance
+			const hits = this.scene.multiPick(evt.x, evt.y);
+
+			if (hits && hits.length > 0) {
+				// Look for dot indicators first (they have higher priority)
+				const dotHit = hits.find(
+					(hit) =>
+						hit.pickedMesh &&
+						(hit.pickedMesh.name.startsWith('dotIndicator') ||
+							hit.pickedMesh.name.startsWith('dotOutline'))
+				);
+
+				if (dotHit) {
+					this.onMeshSelect(dotHit.pickedMesh);
+					return;
+				}
+			}
+
+			// If no dot indicator found, use original behavior
 			this.onMeshSelect(pickResult.pickedMesh);
+		};
+
+		// Add cursor management on pointer move
+		this.scene.onPointerMove = (evt) => {
+			const pickResult = this.scene.pick(evt.x, evt.y);
+
+			if (pickResult?.pickedMesh) {
+				const mesh = pickResult.pickedMesh;
+				// Check if it's a clickable mesh (dot indicator or regular mesh)
+				if (
+					mesh.name.startsWith('dotIndicator') ||
+					mesh.name.startsWith('dotOutline') ||
+					mesh.isPickable
+				) {
+					this.engine.getRenderingCanvas()!.style.cursor = 'pointer';
+				} else {
+					this.engine.getRenderingCanvas()!.style.cursor = 'default';
+				}
+			} else {
+				this.engine.getRenderingCanvas()!.style.cursor = 'default';
+			}
 		};
 	}
 
@@ -50,6 +91,25 @@ export class MeshClickHandler {
 			return;
 		}
 
+		// Check if clicked mesh is a dot indicator
+		if (mesh.name.startsWith('dotIndicator') || mesh.name.startsWith('dotOutline')) {
+			const originalMeshName = mesh.metadata?.originalMeshName;
+			if (originalMeshName) {
+				// Find the original mesh and select it
+				const originalMesh = this.scene.getMeshByName(originalMeshName);
+				if (originalMesh) {
+					this.selectMesh(originalMesh);
+					selectedMesh.set(originalMeshName);
+				}
+			}
+			return;
+		}
+
+		this.selectMesh(mesh);
+		selectedMesh.set(mesh.name);
+	}
+
+	private selectMesh(mesh: BABYLON.AbstractMesh) {
 		if (this.selected) {
 			if (this.selected.mesh == mesh) return;
 			this.selected.mesh.material = this.selected.material;
@@ -62,7 +122,5 @@ export class MeshClickHandler {
 			material: mesh.material
 		};
 		mesh.material = this.selectedMaterial;
-
-		selectedMesh.set(mesh.name);
 	}
 }
