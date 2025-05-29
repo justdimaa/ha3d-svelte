@@ -57,7 +57,18 @@ export const connect = async (): Promise<void> => {
 	}
 };
 
-function createPersistentStore<T>(key: string, defaultValue: T) {
+export function createPersistentStore<T>(key: string, defaultValue: T) {
+	if (browser) {
+		const stored = localStorage.getItem(key);
+		if (stored) {
+			try {
+				defaultValue = JSON.parse(stored);
+			} catch (error) {
+				console.error(`Failed to parse stored value for ${key}:`, error);
+			}
+		}
+	}
+
 	const { subscribe, set, update } = writable<T>(defaultValue);
 
 	return {
@@ -76,19 +87,6 @@ function createPersistentStore<T>(key: string, defaultValue: T) {
 				}
 				return newValue;
 			});
-		},
-		// Initialize from localStorage
-		init: () => {
-			if (browser) {
-				const stored = localStorage.getItem(key);
-				if (stored) {
-					try {
-						set(JSON.parse(stored));
-					} catch (error) {
-						console.error(`Failed to parse stored value for ${key}:`, error);
-					}
-				}
-			}
 		}
 	};
 }
