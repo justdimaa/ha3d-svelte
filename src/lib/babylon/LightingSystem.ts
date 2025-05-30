@@ -13,7 +13,7 @@ export class LightingSystem {
 			new BABYLON.Vector3(0, 1, 0),
 			this.scene
 		);
-		ambientLight.intensity = 0.75;
+		ambientLight.intensity = 1.0;
 		ambientLight.diffuse = new BABYLON.Color3(1, 1, 1);
 		ambientLight.groundColor = new BABYLON.Color3(0.5, 0.5, 0.5);
 	}
