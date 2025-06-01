@@ -1,11 +1,9 @@
 <script lang="ts">
+	import { mdiFan } from '@mdi/js';
+	import CardBase from './CardBase.svelte';
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import { homeApi } from '../../../stores/global';
-	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
-	import { getEntityIcon } from '../../../utils/icons';
-	import { onMount } from 'svelte';
-	import GradientSlider from '../controls/GradientSlider.svelte';
-	import Switch from '../controls/Switch.svelte';
+	import Slider from '../ui/Slider.svelte';
 
 	interface Props {
 		entity: HassEntity;
@@ -13,115 +11,79 @@
 
 	let { entity }: Props = $props();
 
-	let fanSpeedPosition = $state(0);
-
-	const handleSliderDragEnd = () => {
-		const newStepValue = fanSpeedPosition;
-		const percentage = newStepValue * entity.attributes.percentage_step;
-		setPercentage(percentage);
-	};
-
-	const callService = async (service: string, data = {}) => {
+	const handleToggle = async () => {
+		console.log('Toggling fan:', entity.entity_id);
 		await $homeApi?.sendMessagePromise({
 			type: 'call_service',
 			domain: 'fan',
-			service,
-			service_data: {
-				entity_id: entity.entity_id,
-				...data
-			}
+			service: isOn ? 'turn_off' : 'turn_on',
+			service_data: { entity_id: entity.entity_id }
 		});
 	};
 
-	const togglePower = () => callService(entity.state === 'on' ? 'turn_off' : 'turn_on');
-	const setPercentage = (percentage: number) => callService('set_percentage', { percentage });
-	const setPresetMode = (mode: string) => callService('set_preset_mode', { preset_mode: mode });
-	const increaseSpeed = () => callService('increase_speed');
-	const decreaseSpeed = () => callService('decrease_speed');
+	const handleSpeedChange = async (step: number) => {
+		const percentage = step * percentageStep;
+		console.log('Changing fan speed to step:', step, 'percentage:', percentage);
 
-	const syncStateFromEntity = () => {
-		if (!entity) return;
-
-		fanSpeedPosition = Math.round(
-			(entity.attributes.percentage ?? 0) / entity.attributes.percentage_step
-		);
+		await $homeApi?.sendMessagePromise({
+			type: 'call_service',
+			domain: 'fan',
+			service: 'set_percentage',
+			service_data: { entity_id: entity.entity_id, percentage }
+		});
 	};
 
-	onMount(syncStateFromEntity);
+	const handlePresetChange = async (preset: string) => {
+		console.log('Changing fan preset to:', preset);
+		await $homeApi?.sendMessagePromise({
+			type: 'call_service',
+			domain: 'fan',
+			service: 'set_preset_mode',
+			service_data: { entity_id: entity.entity_id, preset_mode: preset }
+		});
+	};
 
-	$effect(() => {
-		if (entity) {
-			syncStateFromEntity();
-		}
-	});
+	const getSpeedGradient = () => {
+		return `linear-gradient(to right, #cbd5e1 0%, #60a5fa ${speed}%, #e2e8f0 ${speed}%, #e2e8f0 100%)`;
+	};
+
+	const isOn = $derived(entity.state === 'on');
+	const speed = $derived(entity.attributes.percentage || 0);
+	const currentPreset = $derived(entity.attributes.preset_mode || null);
+	const presetModes = $derived(entity.attributes.preset_modes || []);
+	const percentageStep = $derived(entity.attributes.percentage_step || 33.33);
+	const maxSteps = $derived(Math.floor(100 / percentageStep));
+	const currentStep = $derived(Math.round((speed || 0) / percentageStep));
+	const hasPresets = $derived(presetModes.length > 0);
 </script>
 
-<div
-	class="flex flex-col justify-between gap-4 rounded-xl border border-white/10 bg-white/10 p-4 shadow lg:backdrop-blur-2xl"
->
-	<!-- Header with name and power -->
-	<button class="flex w-full items-center justify-between gap-2" onclick={togglePower}>
-		<div class="flex items-center gap-2">
-			<SvgIcon class="flex-shrink-0" type="mdi" path={getEntityIcon(entity)} size="20" />
-			<span>{entity.attributes.friendly_name ?? entity.entity_id}</span>
-		</div>
-		<Switch checked={entity.state === 'on'} />
-	</button>
+<CardBase {entity} icon={mdiFan} showToggle={true} toggleState={isOn} onToggle={handleToggle}>
+	<!-- Speed slider -->
+	<Slider
+		label="Speed"
+		value={currentStep}
+		displayValue={speed}
+		min={0}
+		max={maxSteps}
+		unit="%"
+		gradient={getSpeedGradient()}
+		onchange={handleSpeedChange}
+	/>
 
-	{#if entity.state === 'on' && entity.attributes.percentage_step}
-		{@const maxSteps = Math.floor(100 / entity.attributes.percentage_step)}
-		<!-- Speed control -->
-		<div class="flex items-center justify-between gap-2">
-			<div class="flex items-center gap-1">
-				<span
-					>{String(Math.floor(fanSpeedPosition * entity.attributes.percentage_step) ?? 0).padStart(
-						3,
-						'0'
-					)}</span
-				>
-			</div>
-			<GradientSlider
-				min={0}
-				max={maxSteps}
-				step={1}
-				bind:value={fanSpeedPosition}
-				disabled={entity.state !== 'on'}
-				ondragend={handleSliderDragEnd}
-				gradient={`linear-gradient(to right, #4a5568, #a0aec0)`}
-			/>
-			<div class="flex items-center gap-2">
+	<!-- Preset modes (if available) -->
+	{#if hasPresets}
+		<div class="mt-3 grid grid-cols-2 gap-2">
+			{#each presetModes as preset}
 				<button
-					class="h-6 rounded-lg border border-white/10 bg-white/10 px-3 text-sm hover:bg-white/20"
-					disabled={entity.state !== 'on'}
-					onclick={decreaseSpeed}
+					onclick={() => handlePresetChange(preset)}
+					class="rounded-lg border px-3 py-2 text-xs font-medium capitalize transition-colors {currentPreset ===
+					preset
+						? 'border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-900/20 dark:text-blue-300'
+						: 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}"
 				>
-					-
-				</button>
-				<button
-					class="h-6 rounded-lg border border-white/10 bg-white/10 px-3 text-sm hover:bg-white/20"
-					disabled={entity.state !== 'on'}
-					onclick={increaseSpeed}
-				>
-					+
-				</button>
-			</div>
-		</div>
-	{/if}
-
-	<!-- Preset modes -->
-	{#if entity.attributes.preset_modes?.length}
-		<div class="flex flex-wrap gap-2">
-			{#each entity.attributes.preset_modes as mode}
-				<button
-					class="flex h-8 grow items-center rounded-lg border border-white/10 px-3 text-sm {entity.state ===
-						'on' && entity.attributes.preset_mode === mode
-						? 'bg-white/20'
-						: 'bg-white/10 hover:bg-white/20'}"
-					onclick={() => setPresetMode(mode)}
-				>
-					{mode}
+					{preset}
 				</button>
 			{/each}
 		</div>
 	{/if}
-</div>
+</CardBase>

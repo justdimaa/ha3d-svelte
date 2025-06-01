@@ -21,6 +21,24 @@ export class CameraController {
 		this.initializeCamera();
 	}
 
+	public zoom(factor: number): void {
+		const forward = this.camera.getDirection(BABYLON.Vector3.Forward());
+		forward.normalize();
+
+		const currentDistance = BABYLON.Vector3.Distance(this.camera.position, BABYLON.Vector3.Zero());
+		const zoomDistance = currentDistance * (1 - 1 / factor);
+
+		const newPosition = this.targetPosition.add(forward.scale(zoomDistance));
+
+		if (newPosition.y >= this.MIN_Y && newPosition.y <= this.MAX_Y) {
+			this.targetPosition = newPosition;
+		}
+	}
+
+	public resetView(): void {
+		this.targetPosition = new BABYLON.Vector3(5, 5, 5);
+	}
+
 	private initializeCamera(): void {
 		this.createCamera();
 		this.setupCameraInputs();

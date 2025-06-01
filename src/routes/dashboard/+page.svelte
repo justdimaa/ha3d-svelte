@@ -1,13 +1,23 @@
 <script lang="ts">
-	import Overlay from '$lib/components/Overlay.svelte';
+	import Overlay from '$lib/components/overlay/Overlay.svelte';
 	import Canvas from '$lib/components/Canvas.svelte';
+	import { onMount } from 'svelte';
+	import { theme } from '../../stores/theme';
+
+	// Room data
+	let roomName = $state('Bedroom');
+
+	onMount(() => {
+		theme.init();
+	});
 </script>
 
 <div class="flex h-full w-full overflow-hidden">
 	<div class="relative h-full w-full">
+		<!-- 3D Room Renderer -->
 		<Canvas />
-		<div class="pointer-events-none absolute left-0 top-0 flex h-full w-full">
-			<Overlay />
-		</div>
+
+		<!-- 3D Room Overlay -->
+		<Overlay {roomName} />
 	</div>
 </div>

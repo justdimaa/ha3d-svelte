@@ -1,6 +1,6 @@
 <script lang="ts">
-	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
 	import type { HassEntity } from 'home-assistant-js-websocket';
+	import CardBase from './CardBase.svelte';
 	import { getEntityIcon } from '../../../utils/icons';
 
 	interface Props {
@@ -8,19 +8,25 @@
 	}
 
 	let { entity }: Props = $props();
+
+	// Format value for display
+	const formatValue = () => {
+		if (isNaN(value)) return entity.state;
+		if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
+		return value.toLocaleString();
+	};
+
+	const value = $derived(parseFloat(entity.state));
+	const unit = $derived(entity.attributes.unit_of_measurement);
+	const deviceClass = $derived(entity.attributes.device_class);
+	const sensorIcon = $derived(getEntityIcon(entity));
 </script>
 
-<button
-	class="flex justify-between gap-2 rounded-xl border border-white/10 bg-white/10 p-4 shadow lg:backdrop-blur-2xl"
-	disabled
->
-	<div class="flex items-center gap-2">
-		<SvgIcon class="flex-shrink-0" type="mdi" path={getEntityIcon(entity)} size="20" />
-		<span class="text-left">{entity.attributes.friendly_name ?? entity.entity_id}</span>
-	</div>
-	<div class="flex gap-1">
-		<!-- {entity.attributes.device_class} -->
-		<span>{entity.state}</span>
-		<span>{entity.attributes.unit_of_measurement}</span>
-	</div>
-</button>
+<CardBase
+	{entity}
+	icon={sensorIcon}
+	primaryValue="{formatValue()}{unit || ''}"
+	secondaryText={deviceClass
+		? deviceClass.charAt(0).toUpperCase() + deviceClass.slice(1)
+		: 'Sensor'}
+/>
