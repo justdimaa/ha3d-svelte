@@ -30,10 +30,10 @@ export class ModelLoader {
 
 		// TODO: Uncomment this when cache is implemented
 		// Use cached or fetch new
-		// if (cached?.model && cached.sha === sceneData.hash) {
-		// 	console.log('Using cached model');
-		// 	return cached.model;
-		// }
+		if (cached?.model && cached.sha === sceneData.hash) {
+			console.log('Using cached model');
+			return cached.model;
+		}
 
 		const modelBlob = await SceneService.getModel(sceneData.id);
 		await this.cache.cacheModel(sceneData.id, modelBlob, sceneData.hash).catch((err) => {
@@ -44,16 +44,34 @@ export class ModelLoader {
 	}
 
 	private async importModelToScene(modelBlob: Blob, scene: BABYLON.Scene): Promise<void> {
-		const arrayBuffer = await modelBlob.arrayBuffer();
-		const bufferView = new Uint8Array(arrayBuffer);
-		await BABYLON.AppendSceneAsync(bufferView, scene, {
-			pluginExtension: '.glb'
-		});
+		try {
+			const arrayBuffer = await modelBlob.arrayBuffer();
 
-		// After the model is loaded, create dot indicators for interactable meshes
-		const loadedMeshes = scene.meshes;
-		const currentTempMeshes = get(tempMeshes);
-		this.dotIndicatorManager.createIndicators(loadedMeshes, currentTempMeshes as Meshes);
+			// Verify the arrayBuffer isn't corrupted
+			if (arrayBuffer.byteLength === 0) {
+				throw new Error('Empty ArrayBuffer from cached blob');
+			}
+
+			const bufferView = new Uint8Array(arrayBuffer);
+
+			// Check if it's a valid GLB file (starts with 'glTF' magic bytes)
+			const magic = new TextDecoder().decode(bufferView.slice(0, 4));
+			if (magic !== 'glTF') {
+				throw new Error(`Invalid GLB magic bytes: ${magic}`);
+			}
+
+			await BABYLON.AppendSceneAsync(bufferView, scene, {
+				pluginExtension: '.glb'
+			});
+
+			// After the model is loaded, create dot indicators for interactable meshes
+			const loadedMeshes = scene.meshes;
+			const currentTempMeshes = get(tempMeshes);
+			this.dotIndicatorManager.createIndicators(loadedMeshes, currentTempMeshes as Meshes);
+		} catch (error) {
+			console.error('Failed to import cached model:', error);
+			throw error;
+		}
 	}
 
 	private hideWalls(scene: BABYLON.Scene): void {
