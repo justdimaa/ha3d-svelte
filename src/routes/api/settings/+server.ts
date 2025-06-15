@@ -1,6 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 import { z } from 'zod';
-import { SettingsSchema } from '../../../lib/types/api';
+import { SettingsSchema } from '$lib/core/types/api';
 
 export async function GET({ locals }) {
 	try {

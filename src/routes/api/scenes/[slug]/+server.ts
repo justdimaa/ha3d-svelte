@@ -1,9 +1,9 @@
 import path from 'path';
 import fs from 'fs/promises';
 import { error, json } from '@sveltejs/kit';
-import { handleError, saveGLBFile, validateGLBFile, type Scene } from '$lib/types/api';
+import { handleError, saveGLBFile, validateGLBFile, type Scene } from '$lib/core/types/api';
 import type { Prisma } from '@prisma/client';
-import { mapDbSceneToApi } from '$lib/mappers/scene';
+import { mapDbSceneToApi } from '$lib/core/database/mappers/scene';
 
 const SCENES_DIR = './data/scenes';
 

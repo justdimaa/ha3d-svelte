@@ -7,11 +7,11 @@ import {
 	saveGLBFile,
 	SceneSchema,
 	validateGLBFile
-} from '$lib/types/api';
+} from '$lib/core/types/api';
 import { randomUUID } from 'crypto';
 import { existsSync, mkdir } from 'fs';
 import { z } from 'zod';
-import { mapDbSceneToApi } from '$lib/mappers/scene.js';
+import { mapDbSceneToApi } from '$lib/core/database/mappers/scene.js';
 
 const SCENES_DIR = './data/scenes';
 

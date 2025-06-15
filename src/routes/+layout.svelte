@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { HassEntities } from 'home-assistant-js-websocket';
 	import '../app.css';
-	import { entities, tempMeshes } from '../stores/global';
+	import { entities, tempMeshes } from '$lib/shared/stores/global';
 	import { onMount, type Snippet } from 'svelte';
-	import { SceneService } from '$lib/ha/api/sceneService';
-	import { SettingsService } from '$lib/ha/api/settingsService';
+	import { SceneService } from '$lib/features/home-assistant/api/sceneService';
+	import { SettingsService } from '$lib/features/home-assistant/api/settingsService';
 
 	interface Props {
 		children?: Snippet;

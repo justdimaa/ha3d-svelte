@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Overlay from '$lib/components/overlay/Overlay.svelte';
-	import Canvas from '$lib/components/Canvas.svelte';
+	import Overlay from '$lib/features/ui-overlay/components/Overlay.svelte';
+	import Canvas from '$lib/features/3d-scene/components/Canvas.svelte';
 	import { onMount } from 'svelte';
-	import { theme } from '../../stores/theme';
+	import { theme } from '$lib/shared/stores/theme';
 
 	// Room data
 	let roomName = $state('Bedroom');
