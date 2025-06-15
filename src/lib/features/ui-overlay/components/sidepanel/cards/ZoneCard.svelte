@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
+	import SvgIcon from '$lib/shared/components/SvgIcon.svelte';
 	import { mdiMapMarker, mdiAccountMultiple, mdiRadiusOutline, mdiEarth } from '@mdi/js';
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import CardBase from './CardBase.svelte';

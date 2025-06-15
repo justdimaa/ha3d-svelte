@@ -26,6 +26,6 @@
 <CardBase
 	{entity}
 	icon={mdiNumeric}
-	primaryValue="{formatValue(currentValue, unit)}{unit || ''}"
+	primaryValue="{formatValue(currentValue)}{unit || ''}"
 	secondaryText="{min.toLocaleString()}-{max.toLocaleString()}{unit || ''}"
 />

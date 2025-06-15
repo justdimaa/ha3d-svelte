@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
+	import SvgIcon from '$lib/shared/components/SvgIcon.svelte';
 	import {
 		mdiCellphone,
 		mdiMapMarker,

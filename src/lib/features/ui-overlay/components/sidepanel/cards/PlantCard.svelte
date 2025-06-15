@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
+	import SvgIcon from '$lib/shared/components/SvgIcon.svelte';
 	import { mdiSprout, mdiWater, mdiThermometer, mdiWhiteBalanceSunny, mdiAlert } from '@mdi/js';
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import CardBase from './CardBase.svelte';
@@ -64,6 +64,11 @@
 
 	const statusColor = $derived(getStatusColor(entity.state));
 	const problems = $derived(getProblems());
+
+	// Derived status icons
+	const moistureIcon = $derived(getStatusIcon(entity.attributes.moisture_status));
+	const temperatureIcon = $derived(getStatusIcon(entity.attributes.temperature_status));
+	const lightIcon = $derived(getStatusIcon(entity.attributes.dli_status));
 </script>
 
 <CardBase
@@ -80,13 +85,8 @@
 		<!-- Moisture -->
 		<div class="flex items-center gap-1 rounded-lg bg-blue-50 p-2 dark:bg-blue-900/20">
 			<SvgIcon type="mdi" path={mdiWater} size="12" class="text-blue-500 dark:text-blue-400" />
-			{#if getStatusIcon(entity.attributes.moisture_status)}
-				<SvgIcon
-					type="mdi"
-					path={getStatusIcon(entity.attributes.moisture_status)}
-					size="10"
-					class="text-red-500 dark:text-red-400"
-				/>
+			{#if moistureIcon}
+				<SvgIcon type="mdi" path={moistureIcon} size="10" class="text-red-500 dark:text-red-400" />
 			{/if}
 			<span class="text-xs text-blue-700 dark:text-blue-300">Moisture</span>
 		</div>
@@ -99,10 +99,10 @@
 				size="12"
 				class="text-orange-500 dark:text-orange-400"
 			/>
-			{#if getStatusIcon(entity.attributes.temperature_status)}
+			{#if temperatureIcon}
 				<SvgIcon
 					type="mdi"
-					path={getStatusIcon(entity.attributes.temperature_status)}
+					path={temperatureIcon}
 					size="10"
 					class="text-red-500 dark:text-red-400"
 				/>
@@ -118,13 +118,8 @@
 				size="12"
 				class="text-yellow-500 dark:text-yellow-400"
 			/>
-			{#if getStatusIcon(entity.attributes.dli_status)}
-				<SvgIcon
-					type="mdi"
-					path={getStatusIcon(entity.attributes.dli_status)}
-					size="10"
-					class="text-red-500 dark:text-red-400"
-				/>
+			{#if lightIcon}
+				<SvgIcon type="mdi" path={lightIcon} size="10" class="text-red-500 dark:text-red-400" />
 			{/if}
 			<span class="text-xs text-yellow-700 dark:text-yellow-300">Light</span>
 		</div>

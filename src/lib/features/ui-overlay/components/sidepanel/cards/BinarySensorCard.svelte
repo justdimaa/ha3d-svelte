@@ -28,7 +28,7 @@
 	let { entity }: Props = $props();
 
 	// Get sensor info based on device class and state
-	const getSensorInfo = (deviceClass: string, state: string) => {
+	const getSensorInfo = (deviceClass: string | undefined, state: string) => {
 		const isOn = state === 'on';
 
 		switch (deviceClass) {

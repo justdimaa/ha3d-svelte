@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
+	import SvgIcon from '$lib/shared/components/SvgIcon.svelte';
 	import { mdiPlus, mdiMinus, mdiHome } from '@mdi/js';
 	import OverlayButton from './OverlayButton.svelte';
 	import { sceneManager } from '$lib/shared/stores/global';

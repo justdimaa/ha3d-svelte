@@ -47,7 +47,7 @@ export async function PATCH({ request, locals }) {
 		});
 
 		return json(settings);
-	} catch (err) {
+	} catch (err: any) {
 		if (err instanceof z.ZodError) {
 			return error(400, 'Invalid configuration format');
 		}

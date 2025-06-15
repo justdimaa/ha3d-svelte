@@ -53,7 +53,7 @@ export async function DELETE({ params, locals }) {
 		}
 
 		return new Response(null, { status: 204 });
-	} catch (err) {
+	} catch (err: any) {
 		if (err.code === 'P2025') {
 			// Prisma not found error
 			return error(404, 'Scene not found');

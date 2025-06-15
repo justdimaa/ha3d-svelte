@@ -35,7 +35,7 @@ export function getIconPath(iconName: string | undefined): string | undefined {
 		.replace(/-([a-z])/g, (g) => g[1].toUpperCase()) // Convert to camelCase
 		.replace(/^[a-z]/, (g) => g.toUpperCase())}`; // Capitalize the first letter
 
-	return mdiIcons[iconKey];
+	return (mdiIcons as Record<string, string>)[iconKey];
 }
 
 export const deviceIcons: { [key: string]: string } = {

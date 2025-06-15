@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
+	import SvgIcon from '$lib/shared/components/SvgIcon.svelte';
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import { DateTime } from 'luxon';
 	import type { Snippet } from 'svelte';
@@ -158,6 +158,7 @@
 							: 'bg-gray-300 dark:bg-gray-600'}"
 						role="switch"
 						aria-checked={toggleState}
+						aria-label="Toggle {entityName} {toggleState ? 'off' : 'on'}"
 					>
 						<span
 							class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform dark:bg-gray-200 {toggleState

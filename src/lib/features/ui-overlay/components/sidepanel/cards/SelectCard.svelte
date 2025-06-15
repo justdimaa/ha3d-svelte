@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { mdiMenuDown, mdiMenuUp, mdiFormatListBulleted, mdiCheck } from '@mdi/js';
-	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
+	import SvgIcon from '$lib/shared/components/SvgIcon.svelte';
 	import CardBase from './CardBase.svelte';
 	import type { HassEntity } from 'home-assistant-js-websocket';
 	import { homeApi } from '$lib/shared/stores/global';
@@ -40,7 +40,7 @@
 
 	// Close dropdown when clicking outside
 	const handleClickOutside = (event: MouseEvent) => {
-		if (isOpen && !event.target?.closest('.select-dropdown')) {
+		if (isOpen && event.target instanceof Element && !event.target.closest('.select-dropdown')) {
 			isOpen = false;
 		}
 	};

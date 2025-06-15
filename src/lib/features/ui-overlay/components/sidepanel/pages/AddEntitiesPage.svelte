@@ -2,7 +2,7 @@
 	import { SceneService } from '$lib/features/home-assistant/api/sceneService';
 	import { SettingsService } from '$lib/features/home-assistant/api/settingsService';
 	import { entities, selectedMesh, tempMeshes } from '$lib/shared/stores/global';
-	import SvgIcon from '@jamescoyle/svelte-icon/src/svg-icon.svelte';
+	import SvgIcon from '$lib/shared/components/SvgIcon.svelte';
 	import { mdiMagnify, mdiCheck, mdiChevronLeft, mdiChevronRight } from '@mdi/js';
 	import { getEntityIcon } from '$lib/shared/utils/icons';
 	import CardBase from '../cards/CardBase.svelte';
@@ -309,7 +309,7 @@
 									<span class="px-2 text-gray-400 dark:text-gray-500">...</span>
 								{:else}
 									<button
-										onclick={() => goToPage(item)}
+										onclick={() => goToPage(item as number)}
 										class="h-8 w-8 rounded-md text-sm font-medium transition-colors {currentPage ===
 										item
 											? 'bg-blue-600 text-white'
